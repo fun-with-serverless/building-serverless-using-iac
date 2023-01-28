@@ -292,6 +292,12 @@ def lambda_handler(event, context):
     )
     return lambda_response(response['Items'])
 ```
+8. Update `GetSubscribersFunction` to include the relevant environment variable. Add
+```
+Environment:
+        Variables:
+          SUBSCRIBERS_TABLE: !Ref SubscribersTable
+```
 8. Link `utils` in each one of the functions. 
 `cd get_subscribers && ln -s ../utils`
 and
