@@ -710,10 +710,11 @@ Under the `Resources` section
 
 Add
 ```
-SourceEmail:
+Parameters:
+  SourceEmail:
     Type: String
 ```
-under the `Parameters` section
+above `Resources` section.
 
 Replace `ScheduledMessagesTable` with 
 
