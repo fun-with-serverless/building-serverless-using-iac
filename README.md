@@ -238,7 +238,7 @@ into `user-group/utils/api_gw_helpers.py`
 5. Paste 
 ```
 import os
-SUBSCRIBERS_TABLE = os.environ("SUBSCRIBERS_TABLE")
+SUBSCRIBERS_TABLE = os.environ["SUBSCRIBERS_TABLE"]
 ``` 
 into `user-group/utils/consts.py`
 
