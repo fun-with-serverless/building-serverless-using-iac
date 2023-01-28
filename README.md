@@ -241,6 +241,7 @@ import os
 SUBSCRIBERS_TABLE = os.environt("SUBSCRIBERS_TABLE")
 ``` 
 into `user-group/utils/consts.py`
+
 6. Add
 ```
 AddSubscriberFunction:
