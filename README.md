@@ -65,6 +65,9 @@ Resources:
       CodeUri: get_subscribers/
       Handler: app.lambda_handler
       Runtime: python3.9
+      Environment:
+        Variables:
+          SUBSCRIBERS_TABLE: !Ref SubscribersTable
       Architectures:
         - x86_64
       Policies:
@@ -82,7 +85,6 @@ Resources:
   SubscribersTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: "subscribers"
       AttributeDefinitions: 
         - 
           AttributeName: "group_name"
@@ -108,13 +110,14 @@ into `template.yaml`
 7. Paste 
 ```
 import json
+import os
 import boto3
 from boto3.dynamodb.conditions import Key
 
 
 # Cache client
 dynamodb = boto3.resource("dynamodb")
-SUBSCRIBERS_TABLE = "subscribers"
+SUBSCRIBERS_TABLE = os.environ.get("SUBSCRIBERS_TABLE")
 def lambda_handler(event, context):
     # Get group name
     group = event.get("pathParameters", {}).get("group")
@@ -425,7 +428,6 @@ Add a new table definition
 ScheduledMessagesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: "scheduled_messages"
       AttributeDefinitions: 
         - 
           AttributeName: "group_name"
@@ -474,11 +476,8 @@ make sure you answer `y` for all `... may not have authorization defined, Is thi
 7. Search for the file on the S3 bucket and the record in DynamoDB.
 
 ## Step 4 - Send a message
-1. We will change the DynamoDB schema definition. DynamoDB does not support it, threfore we need to delete the current stack.
-2. The deletion will fail becuase you've created an S3 bucket. You have to delete it manually. Go to the S3 console, choose your bucket, click on `Empty` and then `Delete`
-3. Run `sam delete`, choose `y` whenever possible.
-4. Duplicate `get_subscribers` and rename the new folder `send_scheduled_messages`
-5. Paste
+1. Duplicate `get_subscribers` and rename the new folder `send_scheduled_messages`
+2. Paste
 ```
 import json
 import boto3
@@ -559,14 +558,14 @@ def _send_email_to_subscribers(scheduled_messages:List[dict], s3, bucket:str):
 ```
 into `app.py`
 
-6. Paste
+3. Paste
 ```
 boto3==1.21.37
 dacite==1.6.0
 ```
 into `user-group/send_scheduled_messages/requirements.txt`
 
-7. Paste
+4. Paste
 ```
 from datetime import datetime
 from boto3.dynamodb.conditions import Key
@@ -579,7 +578,7 @@ def get_subscribers_by_group(subscribers_table, group:str) -> list:
 ```
 into `user-group/utils/general.py`
 
-8. Paste
+5. Paste
 ```
 from dataclasses import dataclass
 
@@ -591,7 +590,7 @@ class Message:
 ```
 into `user-group/utils/models.py`
 
-9. Add
+6. Add
 ```
 import logging
 
@@ -604,7 +603,7 @@ logger.setLevel(logging.INFO)
 ```
 to `user-group/utils/consts.py`
 
-10. Paste
+7. Paste
 ```
 import json
 import boto3
@@ -626,7 +625,7 @@ def lambda_handler(event, context):
 ```
 into `user-group/get_subscribers/app.py`
 
-11. Paste
+8. Paste
 ```
 import json
 import boto3
@@ -682,7 +681,7 @@ def lambda_handler(event, context):
 ```
 into `user-group/schedule_message/app.py`
 
-12. Add to `user-group/template.yaml`
+9. Add to `user-group/template.yaml`
 ```
 SendScheduledMessagesFunction:
     Type: AWS::Serverless::Function 
@@ -748,9 +747,9 @@ ScheduledMessagesTable:
       BillingMode: PAY_PER_REQUEST
 ```
 
-13. Let's deploy it `sam build && sam deploy --guided`. Make sure to define `SourceEmail` parameter to your email
-14. Next you need to verify your email (the one you defined at step #13) under the SES service. Follow https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure
-15. You are ready to test it
+10. Let's deploy it `sam build && sam deploy --guided`. Make sure to define `SourceEmail` parameter to your email
+11. Next you need to verify your email (the one you defined at step #13) under the SES service. Follow https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure
+12. You are ready to test it
 
 ## Testing
 1. Let's make sure your email is subscribed to the `serverless` group.
