@@ -46,37 +46,7 @@ Ever wanted to create your own mailing list manager a la Serverless style, now i
 3. You should see a basic structure of our SAM aplication for managing user groups.
 4. Rename folder `add_subscriber`  --> `get_subscribers`
 5. Add `boto3==1.21.37` to `requirements.txt`
-6. Paste 
-```
-import json
-import boto3
-from boto3.dynamodb.conditions import Key
-
-
-# Cache client
-dynamodb = boto3.resource("dynamodb")
-SUBSCRIBERS_TABLE = "subscribers"
-def lambda_handler(event, context):
-    # Get group name
-    group = event.get("pathParameters", {}).get("group")
-    if group:
-        table = dynamodb.Table(SUBSCRIBERS_TABLE)
-        response = table.query(
-            KeyConditionExpression=Key('group_name').eq(group)
-        )
-        return {
-            "statusCode": 200,
-            "body": json.dumps(response['Items']),
-        }
-    else:
-        return {
-            "statusCode": 500,
-            "body": "Missing group!",
-        }
-```
-into `app.py`
-
-7. Paste
+6. Paste
 ```
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
@@ -134,6 +104,38 @@ Outputs:
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/subscribers"
 ```
 into `template.yaml`
+
+7. Paste 
+```
+import json
+import boto3
+from boto3.dynamodb.conditions import Key
+
+
+# Cache client
+dynamodb = boto3.resource("dynamodb")
+SUBSCRIBERS_TABLE = "subscribers"
+def lambda_handler(event, context):
+    # Get group name
+    group = event.get("pathParameters", {}).get("group")
+    if group:
+        table = dynamodb.Table(SUBSCRIBERS_TABLE)
+        response = table.query(
+            KeyConditionExpression=Key('group_name').eq(group)
+        )
+        return {
+            "statusCode": 200,
+            "body": json.dumps(response['Items']),
+        }
+    else:
+        return {
+            "statusCode": 500,
+            "body": "Missing group!",
+        }
+```
+into `app.py`
+
+
 
 8. Build and deploy `sam build`
 9. `sam deploy --guided`. Use `user-groups` as stack name
