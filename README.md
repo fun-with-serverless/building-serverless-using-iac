@@ -298,12 +298,12 @@ Environment:
         Variables:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
 ```
-8. Link `utils` in each one of the functions. 
+9. Link `utils` in each one of the functions. 
 `cd get_subscribers && ln -s ../utils`
 and
 `cd add_subscriber && ln -s ../utils`
-9. `sam build && sam deploy`
-10. Test it using curl
+10. `sam build && sam deploy`
+11. Test it using curl
 ```
 curl -X POST https://<api-id>.execute-api.<region>.amazonaws.com/Prod/serverless/subscribers -H 'Content-Type: application/json' -d '{"email":"efi@lumigo.io"}'
 curl https://<api-d>.execute-api.<region>.amazonaws.com/Prod/serverless/subscribers
