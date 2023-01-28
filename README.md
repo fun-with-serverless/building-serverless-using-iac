@@ -94,7 +94,7 @@ Resources:
     Properties:
       CodeUri: get_subscribers/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.7
       Architectures:
         - x86_64
       Policies:
