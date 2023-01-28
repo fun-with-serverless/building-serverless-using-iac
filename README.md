@@ -459,9 +459,9 @@ Outputs:
 ```
 import os
 
-SUBSCRIBERS_TABLE = "subscribers"
-SCHEDULED_MESSAGES_TABLE = "scheduled_messages"
-SCHEDULED_MESSAGES_BUCKET = os.environ.get("SCHEDULED_MESSAGES_BUCKET_NAME") 
+SUBSCRIBERS_TABLE = os.environ["SUBSCRIBERS_TABLE"]
+SCHEDULED_MESSAGES_TABLE = os.environ.get["SCHEDULED_MESSAGES_TABLE_NAME"]
+SCHEDULED_MESSAGES_BUCKET = os.environ.get["SCHEDULED_MESSAGES_BUCKET_NAME"] 
 ```
 into `user-group/utils/consts.py`
 
