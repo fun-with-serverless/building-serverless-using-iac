@@ -442,12 +442,6 @@ ScheduledMessagesTable:
           KeyType: "RANGE"
       BillingMode: PAY_PER_REQUEST
 ```
-Define a new `Parameters` section above `Resources`
-```
-Parameters:
-  ScheduledMessagesBucketName:
-    Type: String
-```
 
 Replace the `Outputs` section
 ```
