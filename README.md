@@ -405,6 +405,7 @@ ScheduleFunction:
       Environment:
         Variables:
           SCHEDULED_MESSAGES_BUCKET_NAME: !Ref ScheduledMessagesBucket
+          SCHEDULED_MESSAGES_TABLE_NAME: !Ref ScheduledMessagesTable
       Events:
         Subscribers:
           Type: Api 
@@ -417,8 +418,6 @@ Add new S3 bucket definition
 ```
 ScheduledMessagesBucket:
     Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Sub "${ScheduledMessagesBucketName}"
 ```
 
 Add a new table definition
