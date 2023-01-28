@@ -12,9 +12,9 @@
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
  
 ## Welcome
-Ever wanted to create your own group manager a la Serverless style, now is your chance. In this workshop you'll build a group manager with the ability to:
-* Create new groups
-* Allow external participants to join these groups
+Ever wanted to create your own mailing list manager a la Serverless style, now is your chance. In this workshop you'll build a group manager with the ability to:
+* Create new mailing list
+* Allow external participants to join these lists
 * Schedule sending a message via email to the subscribers.
 ![workshop](https://user-images.githubusercontent.com/43570637/162735759-7a6dd10b-c1da-4250-bf4c-ddccd53766f7.png)
 
