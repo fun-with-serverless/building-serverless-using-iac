@@ -469,7 +469,31 @@ into `user-group/utils/consts.py`
 
 ## Step 4 - Send a message
 1. Duplicate `get_subscribers` and rename the new folder `send_scheduled_messages`
-2. Paste
+2. Replace `ScheduledMessagesTable` with 
+
+```
+ScheduledMessagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "scheduled_messages"
+      AttributeDefinitions: 
+        - 
+          AttributeName: "group_name"
+          AttributeType: "S"
+        - 
+          AttributeName: "scheduled_date"
+          AttributeType: "S"
+      KeySchema: 
+        - 
+          AttributeName: "scheduled_date"
+          KeyType: "HASH"
+        - 
+          AttributeName: "group_name"
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
+```
+In `template.yaml`
+3. Paste
 ```
 import json
 import boto3
@@ -715,30 +739,6 @@ Parameters:
     Type: String
 ```
 above `Resources` section.
-
-Replace `ScheduledMessagesTable` with 
-
-```
-ScheduledMessagesTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: "scheduled_messages"
-      AttributeDefinitions: 
-        - 
-          AttributeName: "group_name"
-          AttributeType: "S"
-        - 
-          AttributeName: "scheduled_date"
-          AttributeType: "S"
-      KeySchema: 
-        - 
-          AttributeName: "scheduled_date"
-          KeyType: "HASH"
-        - 
-          AttributeName: "group_name"
-          KeyType: "RANGE"
-      BillingMode: PAY_PER_REQUEST
-```
 
 10. Let's deploy it `sam build && sam deploy --guided`. Make sure to define `SourceEmail` parameter to your email
 11. Next you need to verify your email (the one you defined at step #13) under the SES service. Follow https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure
