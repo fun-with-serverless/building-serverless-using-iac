@@ -463,8 +463,6 @@ into `user-group/utils/consts.py`
 
 5. Rerun `sam build && sam deploy`.
 
-make sure you answer `y` for all `... may not have authorization defined, Is this okay?` questions
-
 6. Test it using curl
 `curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/serverless/schedule -H 'Content-Type: application/json' -d '{"subject":"Hello SLS workshop!", "body":"The workshop is not recorded.<h1>Welcome dear friends</h1>", "schedule_on":1649753447000}'`
 7. Search for the file on the S3 bucket and the record in DynamoDB.
