@@ -235,7 +235,12 @@ def require_group(function):
 ```
 into `user-group/utils/api_gw_helpers.py`
 
-5. Paste `SUBSCRIBERS_TABLE = "subscribers"` into `user-group/utils/consts.py`
+5. Paste 
+```
+import os
+SUBSCRIBERS_TABLE = os.environt("SUBSCRIBERS_TABLE")
+``` 
+into `user-group/utils/consts.py
 6. Add
 ```
 AddSubscriberFunction:
@@ -244,6 +249,9 @@ AddSubscriberFunction:
       CodeUri: add_subscriber/
       Handler: app.lambda_handler
       Runtime: python3.9
+      Environment:
+        Variables:
+          SUBSCRIBERS_TABLE: !Ref SubscribersTable
       Architectures:
         - x86_64
       Policies:
