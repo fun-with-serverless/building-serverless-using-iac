@@ -295,18 +295,12 @@ def lambda_handler(event, context):
     )
     return lambda_response(response['Items'])
 ```
-8. Update `GetSubscribersFunction` to include the relevant environment variable. Add
-```
-Environment:
-        Variables:
-          SUBSCRIBERS_TABLE: !Ref SubscribersTable
-```
-9. Link `utils` in each one of the functions. 
+8. Link `utils` in each one of the functions. 
 `cd get_subscribers && ln -s ../utils`
 and
 `cd add_subscriber && ln -s ../utils`
-10. `sam build && sam deploy`
-11. Test it using curl
+9. `sam build && sam deploy`
+10. Test it using curl
 ```
 curl -X POST https://<api-id>.execute-api.<region>.amazonaws.com/Prod/serverless/subscribers -H 'Content-Type: application/json' -d '{"email":"efi@lumigo.io"}'
 curl https://<api-d>.execute-api.<region>.amazonaws.com/Prod/serverless/subscribers
