@@ -240,7 +240,7 @@ into `user-group/utils/api_gw_helpers.py`
 import os
 SUBSCRIBERS_TABLE = os.environt("SUBSCRIBERS_TABLE")
 ``` 
-into `user-group/utils/consts.py
+into `user-group/utils/consts.py`
 6. Add
 ```
 AddSubscriberFunction:
