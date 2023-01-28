@@ -41,7 +41,7 @@ Ever wanted to create your own group manager a la Serverless style, now is your 
 **Wait for the instructor to go over the directory structure of a SAM application.**
 
 ## Step 1 - Implement get-subscribers
-1. Clone `git@github.com:efimk-lu/building-serverless-in-hebrew.git`
+1. Clone `git@github.com:aws-hebrew-book/building-serverless-in-hebrew-workshop.git`
 2. Checkout the `base` tag , e.g. `git checkout tags/base` 
 3. You should see a basic structure of our SAM aplication for managing user groups.
 4. Rename folder `add_subscriber`  --> `get_subscribers`
