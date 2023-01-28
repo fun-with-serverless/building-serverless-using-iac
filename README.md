@@ -459,15 +459,13 @@ Outputs:
 ```
 import os
 
-SUBSCRIBERS_TABLE = os.environ["SUBSCRIBERS_TABLE"]
-SCHEDULED_MESSAGES_TABLE = os.environ.get["SCHEDULED_MESSAGES_TABLE_NAME"]
-SCHEDULED_MESSAGES_BUCKET = os.environ.get["SCHEDULED_MESSAGES_BUCKET_NAME"] 
+SUBSCRIBERS_TABLE = os.environ.get("SUBSCRIBERS_TABLE")
+SCHEDULED_MESSAGES_TABLE = os.environ.get("SCHEDULED_MESSAGES_TABLE_NAME")
+SCHEDULED_MESSAGES_BUCKET = os.environ.get("SCHEDULED_MESSAGES_BUCKET_NAME") 
 ```
 into `user-group/utils/consts.py`
 
-5. S3 bucket name is unique across AWS, therefore the bucket name is defined as an external parameter, which should contain a different value for each one of you.
-
-Rerun `sam build && sam deploy --guided`, give `ScheduledMessagesBucketName` a unique name, for example `myname-randomstr`
+5. Rerun `sam build && sam deploy`.
 
 make sure you answer `y` for all `... may not have authorization defined, Is this okay?` questions
 
