@@ -22,10 +22,7 @@ def lambda_handler(event, context):
                 "date_joined": int(datetime.now().timestamp() * 1000)
             }
         )
-        
+
         return lambda_response({"message":f"{email} added successfully"})
-    
+
     return lambda_response({"err":"Email not found"}, status_code=500)
-        
-        
-        

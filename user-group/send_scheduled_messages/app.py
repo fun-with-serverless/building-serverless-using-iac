@@ -24,10 +24,10 @@ def lambda_handler(event, context):
         messages_to_send = [response for response in responses if response.get("sent") is None ]
         logger.info(f"Found {len(messages_to_send)} messages")
         _send_email_to_subscribers(messages_to_send, s3, SCHEDULED_MESSAGES_BUCKET)
-        
+
         if len(messages_to_send) > 0:
             logger.info("Emails sent successfully")
-        
+
         for item in messages_to_send:
             scheduled_messages_table.update_item(
                 Key={
@@ -40,18 +40,18 @@ def lambda_handler(event, context):
                 },
             )
             logger.info(f"Marked {get_schedule_date_key(now)} for {item['group_name']} as sent")
-    
-        
+
+
     except Exception as e:
         logger.error(e)
         raise e
-            
-    
-    
+
+
+
 def _get_s3_content(s3, bucket:str, key:str):
     response = s3.Object(SCHEDULED_MESSAGES_BUCKET, key).get()
     return response["Body"].read()
-    
+
 def _send_email(subscribers:List[str], content:Message):
     logger.info(f"Sending {len(subscribers)} emails")
     ses_client.send_email(Source=SOURCE_EMAIL, Destination= {"BccAddresses": subscribers}, Message={
@@ -66,13 +66,11 @@ def _send_email(subscribers:List[str], content:Message):
             "Data": content.subject,
         },
     },)
-    
-        
+
+
 def _send_email_to_subscribers(scheduled_messages:List[dict], s3, bucket:str):
     for message in scheduled_messages:
         subscribers = get_subscribers_by_group(subscribers_table, message["group_name"])
         logger.info(subscribers)
         content = from_dict(data_class=Message, data = json.loads(_get_s3_content(s3, bucket, message["message_key"])))
         _send_email([subscriber["subscriber"] for subscriber in subscribers], content)
-        
-        

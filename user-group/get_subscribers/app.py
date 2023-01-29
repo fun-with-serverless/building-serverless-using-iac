@@ -15,4 +15,3 @@ def lambda_handler(event, context):
     group = event["group_name"]
     
     return lambda_response(get_subscribers_by_group(table, group))
-   

@@ -2,6 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
   user-group
+<<<<<<< Updated upstream
 
   User group functionality
 
@@ -21,11 +22,30 @@ Resources:
     Type: AWS::Serverless::Function 
     Properties:
       CodeUri: send_scheduled_messages/
+=======
+  User group functionality
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 10
+Parameters:
+  SourceEmail:
+    Type: String
+Resources:
+  GetSubscribersFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: get_subscribers/
+>>>>>>> Stashed changes
       Handler: app.lambda_handler
       Runtime: python3.9
+      Environment:
+        Variables:
+          SUBSCRIBERS_TABLE: !Ref SubscribersTable
       Architectures:
         - x86_64
       Policies:
+<<<<<<< Updated upstream
         - DynamoDBCrudPolicy: 
             TableName:
               !Ref ScheduledMessagesTable
@@ -48,6 +68,41 @@ Resources:
             Name: MessageRule
 
             
+=======
+        - DynamoDBReadPolicy:
+            TableName:
+              !Ref SubscribersTable
+      
+      Events:
+        Subscribers:
+          Type: Api 
+          Properties:
+            Path: /{group}/subscribers
+            Method: get
+  
+  AddSubscriberFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: add_subscriber/
+      Handler: app.lambda_handler
+      Runtime: python3.9
+      Environment:
+        Variables:
+          SUBSCRIBERS_TABLE: !Ref SubscribersTable
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName:
+              !Ref SubscribersTable
+
+      Events:
+        Subscribers:
+          Type: Api 
+          Properties:
+            Path: /{group}/subscribers
+            Method: post
+>>>>>>> Stashed changes
   ScheduleFunction:
     Type: AWS::Serverless::Function 
     Properties:
@@ -63,16 +118,25 @@ Resources:
         - S3WritePolicy:
             BucketName:
               !Ref ScheduledMessagesBucket
+<<<<<<< Updated upstream
               
       Environment:
         Variables:
           SCHEDULED_MESSAGES_BUCKET_NAME: !Ref ScheduledMessagesBucket
+=======
+
+      Environment:
+        Variables:
+          SCHEDULED_MESSAGES_BUCKET_NAME: !Ref ScheduledMessagesBucket
+          SCHEDULED_MESSAGES_TABLE_NAME: !Ref ScheduledMessagesTable
+>>>>>>> Stashed changes
       Events:
         Subscribers:
           Type: Api 
           Properties:
             Path: /{group}/schedule
             Method: post
+<<<<<<< Updated upstream
   AddSubscriberFunction:
     Type: AWS::Serverless::Function 
     Properties:
@@ -97,11 +161,19 @@ Resources:
     Type: AWS::Serverless::Function 
     Properties:
       CodeUri: get_subscribers/
+=======
+            
+  SendScheduledMessagesFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: send_scheduled_messages/
+>>>>>>> Stashed changes
       Handler: app.lambda_handler
       Runtime: python3.9
       Architectures:
         - x86_64
       Policies:
+<<<<<<< Updated upstream
         - DynamoDBReadPolicy:
             TableName:
               !Ref SubscribersTable
@@ -121,11 +193,47 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: "subscribers"
+=======
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref ScheduledMessagesTable
+        - DynamoDBReadPolicy:
+            TableName:
+              !Ref SubscribersTable
+        - S3ReadPolicy:
+            BucketName:
+              !Ref ScheduledMessagesBucket
+        - SESCrudPolicy:
+            IdentityName:
+              !Ref SourceEmail
+
+
+      Environment:
+        Variables:
+          SCHEDULED_MESSAGES_BUCKET_NAME: !Ref ScheduledMessagesBucket
+          SOURCE_EMAIL: !Ref SourceEmail
+          SCHEDULED_MESSAGES_TABLE_NAME: !Ref ScheduledMessagesTable
+          SUBSCRIBERS_TABLE: !Ref SubscribersTable
+      Events:
+        MessageRule:
+          Type: Schedule
+          Properties:
+            Schedule: 'rate(1 hour)'
+            Name: MessageRule
+            
+  ScheduledMessagesBucket:
+    Type: AWS::S3::Bucket
+    
+  ScheduledMessagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+>>>>>>> Stashed changes
       AttributeDefinitions: 
         - 
           AttributeName: "group_name"
           AttributeType: "S"
         - 
+<<<<<<< Updated upstream
           AttributeName: "subscriber"
           AttributeType: "S"
       KeySchema: 
@@ -140,11 +248,7 @@ Resources:
     Type: AWS::DynamoDB::Table
     Properties:
       TableName: "scheduled_messages"
-      AttributeDefinitions: 
-        - 
-          AttributeName: "group_name"
-          AttributeType: "S"
-        - 
+=======
           AttributeName: "scheduled_date"
           AttributeType: "S"
       KeySchema: 
@@ -155,11 +259,50 @@ Resources:
           AttributeName: "group_name"
           KeyType: "RANGE"
       BillingMode: PAY_PER_REQUEST
+      
+  SubscribersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+>>>>>>> Stashed changes
+      AttributeDefinitions: 
+        - 
+          AttributeName: "group_name"
+          AttributeType: "S"
+        - 
+<<<<<<< Updated upstream
+          AttributeName: "scheduled_date"
+          AttributeType: "S"
+      KeySchema: 
+        - 
+          AttributeName: "scheduled_date"
+          KeyType: "HASH"
+        - 
+          AttributeName: "group_name"
+=======
+          AttributeName: "subscriber"
+          AttributeType: "S"
+      KeySchema: 
+        - 
+          AttributeName: "group_name"
+          KeyType: "HASH"
+        - 
+          AttributeName: "subscriber"
+>>>>>>> Stashed changes
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
 Outputs:
   SubscribersList:
+<<<<<<< Updated upstream
     Description: "API Gateway endpoint URL for Prod stage for Hello World function"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/subscribers"
     
   ScheduleMessage:
     Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+=======
+    Description: "API Gateway endpoint URL getting the subscribers"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/subscribers"
+    
+  ScheduleMessage:
+    Description: "API Gateway endpoint URL for scheduling a message"
+>>>>>>> Stashed changes
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/schedule"

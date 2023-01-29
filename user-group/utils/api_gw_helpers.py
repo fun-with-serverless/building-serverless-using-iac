@@ -14,14 +14,14 @@ def lambda_response(
     :param content_type: The Content-Type header value of the response.
     :param should_gzip: Should the content be compressed.
     """
-    
+
     try:
         body_message = (
             json.dumps(content, default=str) if content_type == "application/json" else content
         )
     except Exception as err:
         print(f"Invalid lambda response. {err}")
-        
+
         status_code = 500
         body_message = "Err"
     response = {
@@ -31,10 +31,10 @@ def lambda_response(
             "Content-Type": content_type,
         },
     }
-   
+
     return response
-    
-    
+
+
 def require_group(function):
     def wrapper(*args, **kwargs):
         event = args[0]
@@ -52,4 +52,3 @@ def require_group(function):
             }
 
     return wrapper
-
