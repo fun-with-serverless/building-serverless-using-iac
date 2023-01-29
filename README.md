@@ -722,6 +722,7 @@ SendScheduledMessagesFunction:
         Variables:
           SCHEDULED_MESSAGES_BUCKET_NAME: !Ref ScheduledMessagesBucket
           SOURCE_EMAIL: !Ref SourceEmail
+          SCHEDULED_MESSAGES_TABLE_NAME: !Ref ScheduledMessagesTable
       Events:
         MessageRule:
           Type: Schedule
