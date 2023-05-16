@@ -1,15 +1,23 @@
 # Building a Serverless application in Hebrew - the workshop
 
-- [Welcome](#welcome)
-- [Prepare your machine](#prepare-your-machine)
-  * [Hello SAM](#hello-sam)
-- [Step 1 - Implement get-subscribers](#step-1---implement-get-subscribers)
-- [Step 2 - Implement add-subscriber](#step-2---implement-add-subscriber)
-- [Step 3 - Schedule a message](#step-3---schedule-a-message)
-- [Step 4 - Send a message](#step-4---send-a-message)
-- [Testing](#testing)
+* [Welcome](#welcome)
+  * [Prepare your machine](#prepare-your-machine)
+    + [Hello SAM](#hello-sam)
+  * [Step 1 - Implement get-subscribers](#step-1---implement-get-subscribers)
+    + [Insights](#insights)
+      - [Hard coding resource names](#hard-coding-resource-names)
+      - [Session managment and Caching](#session-managment-and-caching)
+      - [DDB structure](#ddb-structure)
+      - [Least Priviliged Access](#least-priviliged-access)
+      - [API Gateway integration](#api-gateway-integration)
+    + [Add a new group with subscribers](#add-a-new-group-with-subscribers)
+  * [Step 2 - Implement add-subscriber](#step-2---implement-add-subscriber)
+  * [Step 3 - Schedule a message](#step-3---schedule-a-message)
+  * [Step 4 - Send a message](#step-4---send-a-message)
+  * [Testing](#testing)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
  
 ## Welcome
 Ever wanted to create your own mailing list manager a la Serverless style, now is your chance. In this workshop you'll build a mailing list manager with the ability to:
