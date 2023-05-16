@@ -12,7 +12,7 @@
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
  
 ## Welcome
-Ever wanted to create your own mailing list manager a la Serverless style, now is your chance. In this workshop you'll build a group manager with the ability to:
+Ever wanted to create your own mailing list manager a la Serverless style, now is your chance. In this workshop you'll build a mailing list manager with the ability to:
 * Create new mailing list
 * Allow external participants to join these lists
 * Schedule sending a message via email to the subscribers.
@@ -26,22 +26,25 @@ Ever wanted to create your own mailing list manager a la Serverless style, now i
 ### Hello SAM
 1. `sam init`
 2. Choose `AWS Quick Start Templates`
-3. Choose `Zip`
-4. Choose `Python 3.9`
-5. For project name, choose the default
-6. Choose `Hello World Example` template
-7. You need to build the sam packge 
-8. Go to the folder the template created `cd sam-app`
-9. Run `sam build` and next run `sam deploy --guided`. You should run guided each time you want to add something to the sam configuration file or create it for the first time.
-10. When asked `HelloWorldFunction may not have authorization defined, Is this okay?` choose `y`
-11. The rest can be defaults
-12. `Deploy this changeset?` choose `y`
-13. Give the deployment a try, you should see under `Outputs` the `API Gateway endpoint URL`, copy the URL and try it on browser.
+3. Next choose `Hello World Example`
+4. If you choose to use the most popular runtime and package type, then make sure that Python 3.9 is installed
+6. Choose `Python 3.7`
+7. Choose `Zip`
+8. For project name, choose the default
+<img src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/4bf1a5ca-cdbe-455b-a29d-2ce4a4ddddf0" width="400">
+
+10. You need to build the sam packge 
+11. Go to the folder the template created `cd sam-app`
+12. Run `sam build` and next run `sam deploy --guided`. You should run guided each time you want to add something to the sam configuration file or create it for the first time.
+13. When asked `HelloWorldFunction may not have authorization defined, Is this okay?` choose `y`
+14. The rest can be defaults
+15. `Deploy this changeset?` choose `y`
+16. Give the deployment a try, you should see under `Outputs` the `API Gateway endpoint URL`, copy the URL and try it on browser.
 
 **Wait for the instructor to go over the directory structure of a SAM application.**
 
 ## Step 1 - Implement get-subscribers
-1. Clone `git@github.com:aws-hebrew-book/building-serverless-in-hebrew-workshop.git`
+1. Clone `https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop.git`
 2. Checkout the `base` tag , e.g. `git checkout tags/base` 
 3. You should see a basic structure of our SAM aplication for managing user groups.
 4. Rename folder `add_subscriber`  --> `get_subscribers`
@@ -64,7 +67,7 @@ Resources:
     Properties:
       CodeUri: get_subscribers/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.7
       Environment:
         Variables:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
@@ -101,11 +104,12 @@ Resources:
           KeyType: "RANGE"
       BillingMode: PAY_PER_REQUEST
 Outputs:
-  HelloWorldApi:
-    Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+  SubscribersApi:
+    Description: "API Gateway endpoint URL for Prod stage for subscribers"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/subscribers"
 ```
 into `template.yaml`
+
 
 7. Paste 
 ```
@@ -116,13 +120,14 @@ from boto3.dynamodb.conditions import Key
 
 
 # Cache client
-dynamodb = boto3.resource("dynamodb")
+session = boto3.Session()
+dynamodb = session.resource("dynamodb")
 SUBSCRIBERS_TABLE = os.environ.get("SUBSCRIBERS_TABLE")
+table = dynamodb.Table(SUBSCRIBERS_TABLE)
 def lambda_handler(event, context):
     # Get group name
     group = event.get("pathParameters", {}).get("group")
     if group:
-        table = dynamodb.Table(SUBSCRIBERS_TABLE)
         response = table.query(
             KeyConditionExpression=Key('group_name').eq(group)
         )
@@ -138,10 +143,37 @@ def lambda_handler(event, context):
 ```
 into `app.py`
 
-
-
 8. Build and deploy `sam build`
 9. `sam deploy --guided`. Use `user-groups` as stack name
+
+### Insights
+#### Hard coding resource names
+Avoid hardcoding resource names into your code. Resource names have a tendency to change quite frequently, especially if you are following best practices such as using a unique prefix for each environment.
+
+In AWS SAM, you can easily retrieve resource names using `!Ref` or `!GetAtt logicalNameOfResource.attributeName`. Each CloudFormation resource type documentation includes a 'Return Value' section, which can guide you on which CloudFormation function to use.
+
+You can pass the resource name as an environment variable into Lambda and easily retrieve it via code. In the above code snippet, we are passing the table name using the `SUBSCRIBERS_TABLE` environment variable and retrieving it using `os.environ.get("SUBSCRIBERS_TABLE")`.
+
+#### Session managment and Caching
+Sessions can be used to isolate resources and clients from each other, which can help to prevent accidental access to another session's resources. This is particularly useful when you want to use a different set of AWS credentials or when you want to ensure that the resources and clients of one part of your code do not accidentally have access to another part's resources. Creating a new session does not establish a new connection to AWS. Instead, it helps manage AWS credentials and configurations and allows Boto3 to more efficiently reuse connections, so the second time this Lambda container is called, it can reuse a previous connection.
+
+#### DDB structure
+We are structuring our DynamoDB table based on the queries we intend to use. Currently, we expect to retrieve all subscribers for a specific group, so we are defining the group name as the primary key. This is achieved by setting `group_name` as `HASH` in the AWS SAM definition of the table.
+
+#### Least Priviliged Access
+> Every module (such as a process, a user, or a program, depending on the subject) must be able to access only the information and resources that are necessary for its legitimate purpose.
+
+Our Lambda function only requires ReadOnly access to the DynamoDB table we created. You can define permissions by adding a `Policies` attribute. AWS SAM includes a list of predefined policies that you can use, which can be found [here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-template-list.html#dynamo-db-read-policy). Each policy typically accepts a parameter that specifies the resource to which the policy is applied. In our case, the parameter is `TableName`.
+
+#### API Gateway integration
+One of the benefits of AWS SAM is its ease of event-based integration with additional AWS services like SQS, SNS, API Gateway, etc. To add event integration, all you need to do is add an `Event` attribute with the relevant configuration.
+
+In our case, we are integrating with API Gateway. We define the base URL path using curly braces, like `/{group}/subscribers`. This means that whenever an external client accesses the API, it needs to supply the group it wants to pull. The integration here is proxy-based, so all paths and headers are passed directly to the Lambda function as part of the event variable. You can easily retrieve the path parameter by using `event.get("pathParameters", {}).get("group")` in the code.
+
+### Add a new group with subscribers
+1. Use the DynamoDB console to add a new group with multiple subscribers
+2. Make an API call and get back results
+<img width="1320" alt="CleanShot 2023-05-16 at 14 29 16@2x" src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/8349b69a-9370-4150-950b-7273c705ee70">
 
 ## Step 2 - Implement add-subscriber
 1. Duplicate `get_subscribers` and rename the new folder `add_subscriber`
