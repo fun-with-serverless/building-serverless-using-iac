@@ -406,6 +406,7 @@ from dacite import from_dict
 import logging
 import random
 import string
+import urllib.parse
 
 from utils.consts import SCHEDULED_MESSAGES_TABLE, SCHEDULED_MESSAGES_BUCKET
 from utils.api_gw_helpers import require_group, lambda_response
@@ -439,8 +440,9 @@ def lambda_handler(event, context):
             logger.info("Saving message into S3")
             key = "".join(random.choice(string.ascii_lowercase) for i in range(10))
             meta_data = {"group":group, "subject":message.subject, "scheduled": str(datetime.fromtimestamp(message.schedule_on / 1000)), "key": key}
-            logger.info(meta_data)
-            bucket.put_object(Body=str.encode(body), Key=key, Metadata=meta_data)
+            tagging = "&".join(f"{k}={str(v)}" for k, v in meta_data.items())
+            logger.info(tagging)
+            bucket.put_object(Body=str.encode(body), Key=key, Tagging=tagging)
             logger.info("S3 object saved successfully")
             response = table.put_item(
                Item={
@@ -475,14 +477,14 @@ ScheduleFunction:
     Properties:
       CodeUri: schedule_message/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.7
       Architectures:
         - x86_64
       Policies:
         - DynamoDBWritePolicy:
             TableName:
               !Ref ScheduledMessagesTable
-        - S3WritePolicy:
+        - S3FullAccessPolicy:
             BucketName:
               !Ref ScheduledMessagesBucket
 
@@ -551,8 +553,38 @@ into `user-group/utils/consts.py`
 5. Rerun `sam build && sam deploy`.
 
 6. Test it using curl
-`curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/serverless/schedule -H 'Content-Type: application/json' -d '{"subject":"Hello SLS workshop!", "body":"The workshop is not recorded.<h1>Welcome dear friends</h1>", "schedule_on":1649753447000}'`
+`curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/serverless/schedule -H 'Content-Type: application/json' -d '{"subject":"Hello SLS workshop", "body":"The workshop is not recorded.<h1>Welcome dear friends</h1>", "schedule_on":1649753447000}'`
 7. Search for the file on the S3 bucket and the record in DynamoDB.
+
+### Insights
+#### Using S3 to store content
+DynamoDB has a strict size limit of 400KB per record. Therefore, when storing content that exceeds this limit, it is recommended to use S3 to store the content and use a 'pointer' (an S3 object path) to the full content, as part of the DynamoDB record. In the above code, we are saving content into S3 and storing the object key as part of the DynamoDB record.
+```
+bucket.put_object(Body=str.encode(body), Key=key, Tagging=tagging) # <-- Save to S3
+logger.info("S3 object saved successfully")
+response = table.put_item(
+   Item={
+        "group_name": group,
+        "scheduled_date": message.schedule_on,
+        "message_key": key, # <-- Use key
+        "message_added": int(datetime.now().timestamp() * 1000)
+    }
+)
+```
+
+#### Tagging S3 objects
+AWS Tags are a valuable feature in AWS. I highly recommend making use of them wherever possible, as they can aid in [cost optimization](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/cost-alloc-tags.html) and [compliance](https://docs.aws.amazon.com/config/latest/developerguide/tagging.html).
+
+In addition to tagging resources, you can also tag your S3 objects, which serves several purposes:
+* An easy way to understand the content of the object without actually downloading and opening it.
+* Identify large objects in S3, manage their costs, and control their [life cycle](https://aws.amazon.com/blogs/storage/simplify-your-data-lifecycle-by-using-object-tags-with-amazon-s3-lifecycle/)
+* [Access control](https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html)
+
+Tagging S3 objects has some limitations on the types of characters that are allowed as part of your key and value content. For example, characters like `!` or `@` are not allowed. In cases like this, you can encode your string to eliminate these characters
+
+![CleanShot 2023-05-16 at 17 19 34@2x](https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/23bf743f-5fb7-4cb3-8df0-d1d1c19c08bc)
+
+
 
 ## Step 4 - Send a message
 1. Duplicate `get_subscribers` and rename the new folder `send_scheduled_messages`
