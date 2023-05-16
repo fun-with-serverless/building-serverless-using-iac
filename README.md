@@ -15,11 +15,15 @@
   + [Insights](#insights-1)
     - [Python Decorators](#python-decorators)
     - [Permissions](#permissions)
-    - [Poor's man code sharing](#poors-man-code-sharing)
+    - [Poor's man code sharing](#poor-s-man-code-sharing)
     - [API Gateway response](#api-gateway-response)
 * [Step 3 - Schedule a message](#step-3---schedule-a-message)
+  + [Insights](#insights-2)
+    - [Using S3 to store content](#using-s3-to-store-content)
+    - [Tagging S3 objects](#tagging-s3-objects)
 * [Step 4 - Send a message](#step-4---send-a-message)
 * [Testing](#testing)
+* [Deletion](#deletion)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -893,3 +897,11 @@ Under policies for the `SendScheduledMessagesFunction` Lambda
 7. Redeploy (build & deploy)
 8. A successful message was sent to your subscribers
 <img width="1534" alt="image" src="https://user-images.githubusercontent.com/43570637/162719901-b1e78145-3050-44d4-bcfa-95b8deec3fc7.png">
+
+## Deletion
+After you've completed the workshop, you can delete all the resources you created by running sam delete and answering 'y' to all prompts. Please note that the S3 bucket we created will not be deleted because it contains objects. You must delete these objects before attempting to remove the workshop resources.
+<img width="781" alt="CleanShot 2023-05-16 at 17 29 51@2x" src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/b1ae99b0-d461-43e7-9623-d910bf94585b">
+
+
+
+
