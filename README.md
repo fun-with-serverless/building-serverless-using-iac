@@ -1,20 +1,25 @@
 # Building a Serverless application in Hebrew - the workshop
 
 * [Welcome](#welcome)
-  * [Prepare your machine](#prepare-your-machine)
-    + [Hello SAM](#hello-sam)
-  * [Step 1 - Implement get-subscribers](#step-1---implement-get-subscribers)
-    + [Insights](#insights)
-      - [Hard coding resource names](#hard-coding-resource-names)
-      - [Session managment and Caching](#session-managment-and-caching)
-      - [DDB structure](#ddb-structure)
-      - [Least Priviliged Access](#least-priviliged-access)
-      - [API Gateway integration](#api-gateway-integration)
-    + [Add a new group with subscribers](#add-a-new-group-with-subscribers)
-  * [Step 2 - Implement add-subscriber](#step-2---implement-add-subscriber)
-  * [Step 3 - Schedule a message](#step-3---schedule-a-message)
-  * [Step 4 - Send a message](#step-4---send-a-message)
-  * [Testing](#testing)
+* [Prepare your machine](#prepare-your-machine)
+  + [Hello SAM](#hello-sam)
+* [Step 1 - Implement get-subscribers](#step-1---implement-get-subscribers)
+  + [Insights](#insights)
+    - [Hard coding resource names](#hard-coding-resource-names)
+    - [Session managment and Caching](#session-managment-and-caching)
+    - [DDB structure](#ddb-structure)
+    - [Principle of Least Priviliged Access](#principle-of-least-priviliged-access)
+    - [API Gateway integration](#api-gateway-integration)
+  + [Add a new group with subscribers](#add-a-new-group-with-subscribers)
+* [Step 2 - Implement add-subscriber](#step-2---implement-add-subscriber)
+  + [Insights](#insights-1)
+    - [Python Decorators](#python-decorators)
+    - [Permissions](#permissions)
+    - [Poor's man code sharing](#poors-man-code-sharing)
+    - [API Gateway response](#api-gateway-response)
+* [Step 3 - Schedule a message](#step-3---schedule-a-message)
+* [Step 4 - Send a message](#step-4---send-a-message)
+* [Testing](#testing)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
 
@@ -168,7 +173,7 @@ Sessions can be used to isolate resources and clients from each other, which can
 #### DDB structure
 We are structuring our DynamoDB table based on the queries we intend to use. Currently, we expect to retrieve all subscribers for a specific group, so we are defining the group name as the primary key. This is achieved by setting `group_name` as `HASH` in the AWS SAM definition of the table.
 
-#### Least Priviliged Access
+#### Principle of Least Priviliged Access
 > Every module (such as a process, a user, or a program, depending on the subject) must be able to access only the information and resources that are necessary for its legitimate purpose.
 
 Our Lambda function only requires ReadOnly access to the DynamoDB table we created. You can define permissions by adding a `Policies` attribute. AWS SAM includes a list of predefined policies that you can use, which can be found [here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-template-list.html#dynamo-db-read-policy). Each policy typically accepts a parameter that specifies the resource to which the policy is applied. In our case, the parameter is `TableName`.
@@ -195,7 +200,8 @@ from utils.consts import SUBSCRIBERS_TABLE
 from utils.api_gw_helpers import require_group, lambda_response
 
 # Cache client
-dynamodb = boto3.resource("dynamodb")
+session = boto3.Session()
+dynamodb = session.resource("dynamodb")
 table = dynamodb.Table(SUBSCRIBERS_TABLE)
 
 @require_group
@@ -218,7 +224,7 @@ def lambda_handler(event, context):
 ```
 into `app.py`
 
-3. Create a `utils` python package
+3. Create a `utils` python package. It is a folder with `__init__.py` file.
 4. Paste 
 ```
 import json 
@@ -292,7 +298,7 @@ AddSubscriberFunction:
     Properties:
       CodeUri: add_subscriber/
       Handler: app.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.7
       Environment:
         Variables:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
@@ -322,7 +328,8 @@ from utils.api_gw_helpers import require_group, lambda_response
 
 
 # Cache client
-dynamodb = boto3.resource("dynamodb")
+session = boto3.Session()
+dynamodb = session.resource("dynamodb")
 table = dynamodb.Table(SUBSCRIBERS_TABLE)
 
 @require_group
@@ -336,16 +343,54 @@ def lambda_handler(event, context):
     return lambda_response(response['Items'])
 ```
 8. Link `utils` in each one of the functions. 
-`cd get_subscribers && ln -s ../utils`
+`cd get_subscribers && ln -s ../utils` - on Linux
 and
-`cd add_subscriber && ln -s ../utils`
+`cd add_subscriber && ln -s ../utils` - on Linux
 9. `sam build && sam deploy`
 10. Test it using curl
 ```
-curl -X POST https://<api-id>.execute-api.<region>.amazonaws.com/Prod/serverless/subscribers -H 'Content-Type: application/json' -d '{"email":"efi@lumigo.io"}'
+curl -X POST https://<api-id>.execute-api.<region>.amazonaws.com/Prod/serverless/subscribers -H 'Content-Type: application/json' -d '{"email":"mymail@mail.com"}'
 curl https://<api-d>.execute-api.<region>.amazonaws.com/Prod/serverless/subscribers
 ```
 Replace **api-id** and **region** with the relevent code you can copy from the output 
+This will create a new mailing list named `serverless` and add a new subscriber to it.
+
+### Insights
+#### Python Decorators
+> A decorator is a function that takes another function and extends the behavior of the latter function without explicitly modifying it.
+
+A Python decorator is a form of syntactic sugar that allows us to modify a function's behavior using an `@<function_name>` annotation. In our scenario, we consistently extract the group name from the path parameter, and if it's not found, we want to return a valid error. We can use a decorator to enhance a Lambda handler by injecting the necessary parameters into the event.
+
+We've defined a decorator called `require_group` as part of the utils package, which incorporates `group_name` into the event. If the path parameter is not found, it returns a `500` error to the caller.
+
+Example:
+```
+@require_group
+def lambda_handler(event, context):
+    # Get group name
+    group = event["group_name"]
+ ```
+ #### Permissions
+Just like the previous section, we are adhering to the Principle of Least Privilege Access here, granting the Lambda only write access to the table.
+
+#### Poor's man code sharing
+> Lambda layers provide a convenient way to package libraries and other dependencies that you can use with your Lambda functions. Using layers reduces the size of uploaded deployment archives and makes it faster to deploy your code.
+
+The `utils` package is used across the project and we want to avoid duplicating it. A more ideal solution might involve using a [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-concepts.html#gettingstarted-concepts-layer). However, to avoid adding extra complexity to the current project, we're using a Linux link to share the code.
+
+#### API Gateway response
+API Gateway requires a specific response structure:
+```
+{
+  "statusCode": str(status_code),
+  "body": body_message,
+  "headers": {
+      "Content-Type": content_type,
+}
+```
+Here, `statusCode` and `body` are mandatory, while `headers` are optional. If you do not return this response structure when integrating with API Gateway, your client will receive a 502 HTTP error.
+
+To simplify our code, this functionality has been encapsulated in the `utils` package.
 
 ## Step 3 - Schedule a message
 1. Duplicate `get_subscribers` and rename the new folder `schedule_message`
