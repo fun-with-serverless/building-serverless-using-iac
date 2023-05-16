@@ -225,7 +225,9 @@ def lambda_handler(event, context):
 into `app.py`
 
 3. Create a `utils` python package. It is a folder with `__init__.py` file.
-4. Paste 
+<img width="158" alt="CleanShot 2023-05-16 at 16 08 08@2x" src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/2b7ae5b2-09c0-43dd-9873-07821246ec06">
+
+5. Paste 
 ```
 import json 
 from typing import Callable, Any, Optional, List, Dict, Union
