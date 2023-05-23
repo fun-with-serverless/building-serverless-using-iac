@@ -346,10 +346,7 @@ def lambda_handler(event, context):
     )
     return lambda_response(response['Items'])
 ```
-8. Link `utils` in each one of the functions. 
-`cd get_subscribers && ln -s ../utils` - on Linux
-and
-`cd add_subscriber && ln -s ../utils` - on Linux
+8. Talk about Layers [why we need, python path, removal of req.txt] - TBD
 9. `sam build && sam deploy`
 10. Test it using curl
 ```

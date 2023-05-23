@@ -1,0 +1,2 @@
+import os
+SUBSCRIBERS_TABLE = os.environ["SUBSCRIBERS_TABLE"]
