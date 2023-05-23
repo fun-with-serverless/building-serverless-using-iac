@@ -62,10 +62,8 @@ Ever wanted to create your own mailing list manager a la Serverless style, now i
 **Wait for the instructor to go over the directory structure of a SAM application.**
 
 ## Step 1 - Implement get-subscribers
-1. Clone `https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop.git`
-2. Checkout the `base` tag , e.g. `git checkout tags/base` 
+1. Go to `step1-start`
 3. You should see a basic structure of our SAM aplication for managing user groups.
-4. Rename folder `add_subscriber`  --> `get_subscribers`
 5. Add `boto3==1.21.37` to `requirements.txt`
 6. Paste
 ```
@@ -74,7 +72,6 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   user-group
   User group functionality
-# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 10

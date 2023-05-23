@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  user-group
+  User group functionality
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  GetSubscribersFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: get_subscribers/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Environment:
+        Variables:
+          SUBSCRIBERS_TABLE: !Ref SubscribersTable
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName:
+              !Ref SubscribersTable
+      
+      Events:
+        Subscribers:
+          Type: Api 
+          Properties:
+            Path: /{group}/subscribers
+            Method: get
+  
+  SubscribersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions: 
+        - 
+          AttributeName: "group_name"
+          AttributeType: "S"
+        - 
+          AttributeName: "subscriber"
+          AttributeType: "S"
+      KeySchema: 
+        - 
+          AttributeName: "group_name"
+          KeyType: "HASH"
+        - 
+          AttributeName: "subscriber"
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
+Outputs:
+  SubscribersApi:
+    Description: "API Gateway endpoint URL for Prod stage for subscribers"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/subscribers"
