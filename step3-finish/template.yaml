@@ -21,6 +21,35 @@ Resources:
     Metadata:
       BuildMethod: python3.7
 
+  ScheduleFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: schedule_message/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName:
+              !Ref ScheduledMessagesTable
+        - S3FullAccessPolicy:
+            BucketName:
+              !Ref ScheduledMessagesBucket
+
+      Layers: 
+        - !Ref SharedLayer
+      Environment:
+        Variables:
+          SCHEDULED_MESSAGES_BUCKET_NAME: !Ref ScheduledMessagesBucket
+          SCHEDULED_MESSAGES_TABLE_NAME: !Ref ScheduledMessagesTable
+      Events:
+        Subscribers:
+          Type: Api 
+          Properties:
+            Path: /{group}/schedule
+            Method: post
+
   AddSubscriberFunction:
     Type: AWS::Serverless::Function 
     Properties:
@@ -69,6 +98,29 @@ Resources:
             Path: /{group}/subscribers
             Method: get
   
+  ScheduledMessagesBucket:
+    Type: AWS::S3::Bucket
+
+  ScheduledMessagesTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: "scheduled_messages"
+      AttributeDefinitions: 
+        - 
+          AttributeName: "group_name"
+          AttributeType: "S"
+        - 
+          AttributeName: "scheduled_date"
+          AttributeType: "S"
+      KeySchema: 
+        - 
+          AttributeName: "scheduled_date"
+          KeyType: "HASH"
+        - 
+          AttributeName: "group_name"
+          KeyType: "RANGE"
+      BillingMode: PAY_PER_REQUEST
+
   SubscribersTable:
     Type: AWS::DynamoDB::Table
     Properties:
@@ -88,6 +140,10 @@ Resources:
           KeyType: "RANGE"
       BillingMode: PAY_PER_REQUEST
 Outputs:
-  SubscribersApi:
-    Description: "API Gateway endpoint URL for Prod stage for subscribers"
+  SubscribersList:
+    Description: "API Gateway endpoint URL getting the subscribers"
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/subscribers"
+    
+  ScheduleMessage:
+    Description: "API Gateway endpoint URL for scheduling a message"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/schedule"

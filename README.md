@@ -297,6 +297,19 @@ into `user-group/utils/consts.py`
 
 6. Add
 ```
+SharedLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: group-subscription-layer
+      Description: Utility layer used by subscription application
+      ContentUri: group_subscription_layer/
+      CompatibleRuntimes:
+        - python3.10
+        - python3.9
+        - python3.7
+    Metadata:
+      BuildMethod: python3.7
+
 AddSubscriberFunction:
     Type: AWS::Serverless::Function 
     Properties:
@@ -313,6 +326,8 @@ AddSubscriberFunction:
             TableName:
               !Ref SubscribersTable
 
+      Layers: 
+        - !Ref SharedLayer
       Events:
         Subscribers:
           Type: Api 
@@ -405,10 +420,12 @@ from dacite import from_dict
 import logging
 import random
 import string
-import urllib.parse
+import re
+
 
 from utils.consts import SCHEDULED_MESSAGES_TABLE, SCHEDULED_MESSAGES_BUCKET
 from utils.api_gw_helpers import require_group, lambda_response
+from utils.general import get_schedule_date_key
 
 # Cache client
 dynamodb = boto3.resource("dynamodb")
@@ -420,11 +437,13 @@ bucket = s3.Bucket(SCHEDULED_MESSAGES_BUCKET)
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
+
 @dataclass(frozen=True)
 class Message:
-    subject:str
+    subject: str
     body: str
     schedule_on: int
+
 
 @require_group
 def lambda_handler(event, context):
@@ -432,32 +451,48 @@ def lambda_handler(event, context):
     group = event["group_name"]
     body = event.get("body")
     if body is None:
-        return lambda_response({"err":"Missing message details"}, status_code=500)
+        return lambda_response({"err": "Missing message details"}, status_code=500)
     else:
         try:
-            message = from_dict(data_class=Message, data = json.loads(body))
+            message = from_dict(data_class=Message, data=json.loads(body))
             logger.info("Saving message into S3")
             key = "".join(random.choice(string.ascii_lowercase) for i in range(10))
-            meta_data = {"group":group, "subject":message.subject, "scheduled": str(datetime.fromtimestamp(message.schedule_on / 1000)), "key": key}
-            tagging = "&".join(f"{k}={str(v)}" for k, v in meta_data.items())
+            meta_data = {
+                "group": group,
+                "subject": message.subject,
+                "scheduled": str(datetime.fromtimestamp(message.schedule_on / 1000)),
+                "key": key,
+            }
+            tagging = "&".join(
+                f"{k}={_filter_string(str(v))}" for k, v in meta_data.items()
+            )
             logger.info(tagging)
             bucket.put_object(Body=str.encode(body), Key=key, Tagging=tagging)
             logger.info("S3 object saved successfully")
             response = table.put_item(
-               Item={
+                Item={
                     "group_name": group,
-                    "scheduled_date": message.schedule_on,
+                    "scheduled_date": get_schedule_date_key(
+                        datetime.fromtimestamp(message.schedule_on / 1000)
+                    ),
                     "message_key": key,
-                    "message_added": int(datetime.now().timestamp() * 1000)
+                    "message_added": int(datetime.now().timestamp() * 1000),
                 }
             )
             logger.info("DDB object saved successfully")
 
-            return lambda_response({"message":"Message scheduled successfully", "details": meta_data})
+            return lambda_response(
+                {"message": "Message scheduled successfully", "details": meta_data}
+            )
 
         except Exception as e:
             logging.error(e)
-            return lambda_response({"err":"Failed saving message"}, status_code=500)
+            return lambda_response({"err": "Failed saving message"}, status_code=500)
+
+
+def _filter_string(s: str):
+    return re.sub(r"[^\w\s\+\-=:\/@\.]", "", s)
+
 ```
 into `app.py`
 
@@ -466,9 +501,20 @@ into `app.py`
 boto3==1.21.37
 dacite==1.6.0
 ```
-into `user-group/schedule_message/requirements.txt`
+into `group_subscription_layer/python/utils/requirements.txt`
 
-4. Add to `user-group/template.yaml`
+4. Paste
+```
+from datetime import datetime
+from boto3.dynamodb.conditions import Key
+
+def get_schedule_date_key(exact_date:datetime) -> str:
+    return f"{exact_date.year}_{exact_date.month}_{exact_date.day}_{exact_date.hour}"
+
+```
+into `group_subscription_layer/python/utils/general.py`
+
+5. Add to `user-group/template.yaml`
 Under Resources
 ```
 ScheduleFunction:
@@ -487,6 +533,8 @@ ScheduleFunction:
             BucketName:
               !Ref ScheduledMessagesBucket
 
+      Layers: 
+        - !Ref SharedLayer
       Environment:
         Variables:
           SCHEDULED_MESSAGES_BUCKET_NAME: !Ref ScheduledMessagesBucket
@@ -510,19 +558,20 @@ Add a new table definition
 ScheduledMessagesTable:
     Type: AWS::DynamoDB::Table
     Properties:
+      TableName: "scheduled_messages"
       AttributeDefinitions: 
         - 
           AttributeName: "group_name"
           AttributeType: "S"
         - 
           AttributeName: "scheduled_date"
-          AttributeType: "N"
+          AttributeType: "S"
       KeySchema: 
         - 
-          AttributeName: "group_name"
+          AttributeName: "scheduled_date"
           KeyType: "HASH"
         - 
-          AttributeName: "scheduled_date"
+          AttributeName: "group_name"
           KeyType: "RANGE"
       BillingMode: PAY_PER_REQUEST
 ```
@@ -539,7 +588,7 @@ Outputs:
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/schedule"
 ```
 
-4. Paste 
+6. Paste 
 ```
 import os
 
@@ -547,13 +596,13 @@ SUBSCRIBERS_TABLE = os.environ.get("SUBSCRIBERS_TABLE")
 SCHEDULED_MESSAGES_TABLE = os.environ.get("SCHEDULED_MESSAGES_TABLE_NAME")
 SCHEDULED_MESSAGES_BUCKET = os.environ.get("SCHEDULED_MESSAGES_BUCKET_NAME") 
 ```
-into `user-group/utils/consts.py`
+into `group_subscription_layer/python/utils/consts.py`
 
-5. Rerun `sam build && sam deploy`.
+7. Rerun `sam build && sam deploy`.
 
-6. Test it using curl
-`curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/serverless/schedule -H 'Content-Type: application/json' -d '{"subject":"Hello SLS workshop", "body":"The workshop is not recorded.<h1>Welcome dear friends</h1>", "schedule_on":1649753447000}'`
-7. Search for the file on the S3 bucket and the record in DynamoDB.
+8. Test it using curl
+`curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/serverless/schedule -H 'Content-Type: application/json' -d '{"subject":"Hello SLS workshop!", "body":"The workshop is not recorded.<h1>Welcome dear friends</h1>", "schedule_on":1649753447000}'`
+9. Search for the file on the S3 bucket and the record in DynamoDB.
 
 ### Insights
 #### Using S3 to store content
@@ -587,30 +636,7 @@ Tagging S3 objects has some limitations on the types of characters that are allo
 
 ## Step 4 - Send a message
 1. Duplicate `get_subscribers` and rename the new folder `send_scheduled_messages`
-2. Replace `ScheduledMessagesTable` with 
 
-```
-ScheduledMessagesTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      TableName: "scheduled_messages"
-      AttributeDefinitions: 
-        - 
-          AttributeName: "group_name"
-          AttributeType: "S"
-        - 
-          AttributeName: "scheduled_date"
-          AttributeType: "S"
-      KeySchema: 
-        - 
-          AttributeName: "scheduled_date"
-          KeyType: "HASH"
-        - 
-          AttributeName: "group_name"
-          KeyType: "RANGE"
-      BillingMode: PAY_PER_REQUEST
-```
-In `template.yaml`
 3. Paste
 ```
 import json
