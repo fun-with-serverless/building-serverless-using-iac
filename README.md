@@ -40,6 +40,7 @@ Ever wanted to create your own mailing list manager a la Serverless style, now i
 1. Install AWS SAM. Follow https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html
 2. Verify it works as expected, run `sam --version` yiu should be getting something like `> SAM CLI, version 1.33.0`. Pay attention that the version might change
 3. Let's initialize an Hello World for SAM example. If it works, then your machine is ready.
+4. Clone `https://github.com/aws-hebrew-book/building-serverless-using-iac.git`
 ### Hello SAM
 1. `sam init`
 2. Choose `AWS Quick Start Templates`
