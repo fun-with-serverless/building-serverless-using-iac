@@ -2,7 +2,7 @@
 
 * [Welcome](#welcome)
 * [Prepare your machine](#prepare-your-machine)
-  + [Hello SAM](#hello-sam)
+* [Hello SAM](#hello-sam)
 * [Step 1 - Implement get-subscribers](#step-1---implement-get-subscribers)
   + [Insights](#insights)
     - [Hard coding resource names](#hard-coding-resource-names)
@@ -40,12 +40,18 @@ The development of the application is carried out in four phases, where each pha
 
 ## Prepare your machine
 1. Install AWS SAM. Follow https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html
-2. Verify it works as expected, run `sam --version` yiu should be getting something like `> SAM CLI, version 1.33.0`. Pay attention that the version might change
+2. Verify it works as expected, run `sam --version` you should be getting something like `> SAM CLI, version 1.33.0`. Pay attention that the version might change
 3. Let's initialize an Hello World for SAM example. If it works, then your machine is ready.
 4. Clone `https://github.com/aws-hebrew-book/building-serverless-using-iac.git`
-### Hello SAM
+
 The application will be constructed using AWS SAM. The next section provides an overview of AWS SAM; if you already have experience with this service, feel free to skip ahead.
 
+## Hello SAM
+[Amazon Web Services Serverless Application Model (AWS SAM)](https://aws.amazon.com/serverless/sam/) is a framework for building serverless applications. It simplifies the process of creating and managing resources used in serverless applications using AWS services like Lambda, API Gateway, and DynamoDB. 
+AWS SAM uses a template file to define your serverless application and its resources, providing a streamlined and consistent method for deploying complex serverless applications. 
+By leveraging AWS SAM, you can more easily automate deployment processes, test your applications locally before deploying, and even generate boilerplate code for common serverless patterns.
+
+In the following section we will build a simple hello world application using SAM.
 1. `sam init`
 2. Choose `AWS Quick Start Templates`
 3. Next choose `Hello World Example`
@@ -63,7 +69,39 @@ The application will be constructed using AWS SAM. The next section provides an 
 15. `Deploy this changeset?` choose `y`
 16. Give the deployment a try, you should see under `Outputs` the `API Gateway endpoint URL`, copy the URL and try it on browser.
 
-**Wait for the instructor to go over the directory structure of a SAM application.**
+
+
+<table>
+	<tr>
+		<td>
+    <details>
+  <summary>Speaker Notes</summary>
+  <h4>Template</h4>
+  At the core of every AWS SAM application lies the template.yaml, a file that outlines the resources utilized by the app. Our sample template file is split into four main sections:
+  <ol>
+    <li>
+      Header - This section provides the template's definition and description, which are displayed in the CloudFormation console.
+    </li>
+    <li>
+      Global - This section contains global configurations that apply to all resources. In our case, we have set default values for the timeout and memory of all Lambdas to 3 seconds and 128 MB, respectively.
+    </li>
+    <li>
+      Resources - This section details the resources to be established as part of the application. In our case, it is a Lambda function.
+    </li>
+    <li>
+      Outputs - This section enumerates output values that can be imported into other stacks (for creating cross-stack references), returned in responses (to provide stack call descriptions), or viewed on the AWS CloudFormation console.
+    </li>
+  </ol>
+  <h4>Simplicity</h4>
+  With AWS SAM, defining a Lambda function is as straightforward as pointing to a directory containing your code. AWS SAM then takes care of bundling the folder's contents along with the necessary dependencies into a zip file, and uploading it to AWS. It also automatically generates the appropriate IAM roles for you during this process.
+  <h4>Interoperability</h4>
+  A key advantage of AWS SAM is its seamless integration with other services. For instance, in our example, we've integrated our Lambda function with API Gateway, demonstrating the simplicity of combining AWS services in a SAM application.
+</details>
+    </td>
+	</tr>
+</table>
+
+
 
 ## Step 1 - Implement get-subscribers
 1. Go to `start-here-step1`
