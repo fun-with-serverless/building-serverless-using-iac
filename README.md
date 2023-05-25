@@ -71,14 +71,12 @@ In the following section we will build a simple hello world application using SA
 17. When done, run `sam delete` to remove the stack.
 
 
-
-<table>
-	<tr>
-		<td>
-    <details>
-  <summary>Speaker Notes</summary>
-  <h4>Template</h4>
-  At the core of every AWS SAM application lies the template.yaml, a file that outlines the resources utilized by the app. Our sample template file is split into four main sections:
+<details>
+  <summary>👂 Speaker Notes</summary>
+	
+### Template
+	
+At the core of every AWS SAM application lies the template.yaml, a file that outlines the resources utilized by the app. Our sample template file is split into four main sections:
   <ol>
     <li>
       Header - This section provides the template's definition and description, which are displayed in the CloudFormation console.
@@ -93,21 +91,20 @@ In the following section we will build a simple hello world application using SA
       Outputs - This section enumerates output values that can be imported into other stacks (for creating cross-stack references), returned in responses (to provide stack call descriptions), or viewed on the AWS CloudFormation console.
     </li>
   </ol>
-  <h4>Simplicity</h4>
-  With AWS SAM, defining a Lambda function is as straightforward as pointing to a directory containing your code. AWS SAM then takes care of bundling the folder's contents along with the necessary dependencies into a zip file, and uploading it to AWS. It also automatically generates the appropriate IAM roles for you during this process.
-  <h4>Interoperability</h4>
-  A key advantage of AWS SAM is its seamless integration with other services. For instance, in our example, we've integrated our Lambda function with API Gateway, demonstrating the simplicity of combining AWS services in a SAM application.
+	
+### Simplicity
+With AWS SAM, defining a Lambda function is as straightforward as pointing to a directory containing your code. AWS SAM then takes care of bundling the folder's contents along with the necessary dependencies into a zip file, and uploading it to AWS. It also automatically generates the appropriate IAM roles for you during this process.
+  
+### Interoperability
+A key advantage of AWS SAM is its seamless integration with other services. For instance, in our example, we've integrated our Lambda function with API Gateway, demonstrating the simplicity of combining AWS services in a SAM application.
 </details>
-    </td>
-	</tr>
-</table>
 
 
 
 ## Step 1 - Implement get-subscribers
 1. Go to `start-here-step1`
 3. You should see a basic structure of our SAM aplication for managing user groups.
-5. Add `boto3==1.21.37` to `requirements.txt`
+5. Add `boto3==1.21.37` to `get_subscribers/requirements.txt`
 6. Paste
 ```
 AWSTemplateFormatVersion: '2010-09-09'
@@ -204,34 +201,41 @@ into `app.py`
 8. Build and deploy `sam build`
 9. `sam deploy --guided`. Use `user-groups` as stack name
 
-### Insights
-#### Hard coding resource names
+### Add a new group with subscribers
+1. Use the DynamoDB console to add a new group with multiple subscribers
+2. Make an API call and get back results
+<img width="1320" alt="CleanShot 2023-05-16 at 14 29 16@2x" src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/8349b69a-9370-4150-950b-7273c705ee70">
+
+
+<details>
+<summary>👂 Speaker Notes</summary>
+
+### Hard coding resource names
 Avoid hardcoding resource names into your code. Resource names have a tendency to change quite frequently, especially if you are following best practices such as using a unique prefix for each environment.
 
 In AWS SAM, you can easily retrieve resource names using `!Ref` or `!GetAtt logicalNameOfResource.attributeName`. Each CloudFormation resource type documentation includes a 'Return Value' section, which can guide you on which CloudFormation function to use.
 
 You can pass the resource name as an environment variable into Lambda and easily retrieve it via code. In the above code snippet, we are passing the table name using the `SUBSCRIBERS_TABLE` environment variable and retrieving it using `os.environ.get("SUBSCRIBERS_TABLE")`.
 
-#### Session managment and Caching
+### Session managment and Caching
 Sessions can be used to isolate resources and clients from each other, which can help to prevent accidental access to another session's resources. This is particularly useful when you want to use a different set of AWS credentials or when you want to ensure that the resources and clients of one part of your code do not accidentally have access to another part's resources. Creating a new session does not establish a new connection to AWS. Instead, it helps manage AWS credentials and configurations and allows Boto3 to more efficiently reuse connections, so the second time this Lambda container is called, it can reuse a previous connection.
 
-#### DDB structure
+### DDB structure
 We are structuring our DynamoDB table based on the queries we intend to use. Currently, we expect to retrieve all subscribers for a specific group, so we are defining the group name as the primary key. This is achieved by setting `group_name` as `HASH` in the AWS SAM definition of the table.
 
-#### Principle of Least Priviliged Access
+### Principle of Least Priviliged Access
 > Every module (such as a process, a user, or a program, depending on the subject) must be able to access only the information and resources that are necessary for its legitimate purpose.
 
 Our Lambda function only requires ReadOnly access to the DynamoDB table we created. You can define permissions by adding a `Policies` attribute. AWS SAM includes a list of predefined policies that you can use, which can be found [here](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-policy-template-list.html#dynamo-db-read-policy). Each policy typically accepts a parameter that specifies the resource to which the policy is applied. In our case, the parameter is `TableName`.
 
-#### API Gateway integration
+### API Gateway integration
 One of the benefits of AWS SAM is its ease of event-based integration with additional AWS services like SQS, SNS, API Gateway, etc. To add event integration, all you need to do is add an `Event` attribute with the relevant configuration.
 
 In our case, we are integrating with API Gateway. We define the base URL path using curly braces, like `/{group}/subscribers`. This means that whenever an external client accesses the API, it needs to supply the group it wants to pull. The integration here is proxy-based, so all paths and headers are passed directly to the Lambda function as part of the event variable. You can easily retrieve the path parameter by using `event.get("pathParameters", {}).get("group")` in the code.
 
-### Add a new group with subscribers
-1. Use the DynamoDB console to add a new group with multiple subscribers
-2. Make an API call and get back results
-<img width="1320" alt="CleanShot 2023-05-16 at 14 29 16@2x" src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/8349b69a-9370-4150-950b-7273c705ee70">
+</details>
+
+
 
 ## Step 2 - Implement add-subscriber
 1. Duplicate `get_subscribers` and rename the new folder `add_subscriber`
