@@ -68,6 +68,7 @@ In the following section we will build a simple hello world application using SA
 14. The rest can be defaults
 15. `Deploy this changeset?` choose `y`
 16. Give the deployment a try, you should see under `Outputs` the `API Gateway endpoint URL`, copy the URL and try it on browser.
+17. When done, run `sam delete` to remove the stack.
 
 
 
