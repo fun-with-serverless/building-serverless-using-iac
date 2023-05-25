@@ -3,11 +3,10 @@ import boto3
 from datetime import datetime
 from dataclasses import dataclass
 from dacite import from_dict
-import logging
 import random
 import string
 import re
-
+from aws_lambda_powertools import Logger
 
 from utils.consts import SCHEDULED_MESSAGES_TABLE, SCHEDULED_MESSAGES_BUCKET
 from utils.api_gw_helpers import require_group, lambda_response
@@ -20,8 +19,7 @@ table = dynamodb.Table(SCHEDULED_MESSAGES_TABLE)
 s3 = boto3.resource("s3")
 bucket = s3.Bucket(SCHEDULED_MESSAGES_BUCKET)
 
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger = Logger()
 
 
 @dataclass(frozen=True)
