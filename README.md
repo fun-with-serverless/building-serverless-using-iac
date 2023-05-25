@@ -702,8 +702,10 @@ into `group_subscription_layer/utils/consts.py`
 
 	![CleanShot 2023-05-16 at 17 19 34@2x](https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/23bf743f-5fb7-4cb3-8df0-d1d1c19c08bc)
 
+	#### PowerTools
+	Stop reinventing the wheel. AWS Lambda Power Tools is a suite of utilities for AWS Lambda functions that makes it easier for developers to follow best practices for tracing, structured logging, custom metrics, and more. You can find more details [here](https://awslabs.github.io/aws-lambda-powertools-python/2.15.0/)
 	#### Principle of Least Priviliged Access - Take 2
-	Sometimes AWS SAM does not have the right predefined IAM policies, in cases like that you should define your own policy. In our case in order to write an S3 object tag, you need `PutObjectTagging` permission, AWS SAM does not provide one, the only one it does provide is `S3FullAccessPolicy` which is too permissive.
+	There may be instances where AWS SAM doesn't supply the exact IAM policies you require. In such situations, it becomes necessary to formulate your own policy. For our specific scenario, we need the `PutObjectTagging` permission to write an S3 object tag. Unfortunately, AWS SAM doesn't offer this particular policy. The only available option is the `S3FullAccessPolicy`, which is excessively broad for our needs.
 	</detail>
 	
 
@@ -720,10 +722,12 @@ from boto3.dynamodb.conditions import Key
 from typing import List
 from dacite import from_dict
 from utils.models import Message
+from aws_lambda_powertools import Logger
 
 from utils.consts import SCHEDULED_MESSAGES_TABLE, SUBSCRIBERS_TABLE, SCHEDULED_MESSAGES_BUCKET, logger, SOURCE_EMAIL
 from utils.general import get_schedule_date_key, get_subscribers_by_group
 
+logger = Logger()
 # Cache client
 dynamodb = boto3.resource("dynamodb")
 scheduled_messages_table = dynamodb.Table(SCHEDULED_MESSAGES_TABLE)
@@ -813,16 +817,9 @@ into `group_subscription_layer/utils/models.py`
 
 6. Add
 ```
-import logging
-
-# previous stuff
-
 SOURCE_EMAIL = os.environ.get("SOURCE_EMAIL")
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO) 
 ```
-to `user-group/utils/consts.py`
+to `group_subscription_layer/utils/consts.py`
 
 7. Paste
 ```
@@ -844,7 +841,7 @@ def lambda_handler(event, context):
     
     return lambda_response(get_subscribers_by_group(table, group))
 ```
-into `user-group/get_subscribers/app.py`
+into `get_subscribers/app.py`
 
 9. Add to `user-group/template.yaml`
 ```
@@ -897,9 +894,19 @@ above `Resources` section.
 11. Next you need to verify your email (the one you defined at the previous step) under the SES service. Follow https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure
 12. You are ready to test it
 
-#### Insights
-* Talk about scheduling
-* 
+	
+	<details>
+	<summary>👂 Speaker Notes</summary>
+
+	#### Scheduling
+	There are multiple ways to schedule events in AWS:
+	* Use [SQS Delay Queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-delay-queues.html) to postpone the delivery of a new message by up to 15 minutes.
+	* Using [EventBridge Rule](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html) is the most straightforward method to schedule an event.
+	* Using [DDB TTL with DDB Streams](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/time-to-live-ttl-streams.html) to trigger a Lambda.
+	* The recently added [AWS Scheduler](https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html) service.
+	</details
+
+	
 ## Testing & Monitoring
 1. Let's make sure your email is subscribed to the `serverless` group.
 ```
