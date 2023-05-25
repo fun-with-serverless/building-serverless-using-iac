@@ -35,6 +35,8 @@ Ever wanted to create your own mailing list manager a la Serverless style, now i
 * Schedule sending a message via email to the subscribers.
 ![workshop](https://user-images.githubusercontent.com/43570637/162735759-7a6dd10b-c1da-4250-bf4c-ddccd53766f7.png)
 
+The development of the application is carried out in four phases, where each phase incorporates new features.
+
 
 ## Prepare your machine
 1. Install AWS SAM. Follow https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html
@@ -42,6 +44,8 @@ Ever wanted to create your own mailing list manager a la Serverless style, now i
 3. Let's initialize an Hello World for SAM example. If it works, then your machine is ready.
 4. Clone `https://github.com/aws-hebrew-book/building-serverless-using-iac.git`
 ### Hello SAM
+The application will be constructed using AWS SAM. The next section provides an overview of AWS SAM; if you already have experience with this service, feel free to skip ahead.
+
 1. `sam init`
 2. Choose `AWS Quick Start Templates`
 3. Next choose `Hello World Example`
@@ -62,7 +66,7 @@ Ever wanted to create your own mailing list manager a la Serverless style, now i
 **Wait for the instructor to go over the directory structure of a SAM application.**
 
 ## Step 1 - Implement get-subscribers
-1. Go to `step1-start`
+1. Go to `start-here-step1`
 3. You should see a basic structure of our SAM aplication for managing user groups.
 5. Add `boto3==1.21.37` to `requirements.txt`
 6. Paste
