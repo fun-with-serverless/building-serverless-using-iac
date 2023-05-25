@@ -259,8 +259,8 @@ def lambda_handler(event, context):
 ```
 into `app.py`
 
-3. Create a `utils` python package. It is a folder with `__init__.py` file.
-<img width="158" alt="CleanShot 2023-05-16 at 16 08 08@2x" src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/2b7ae5b2-09c0-43dd-9873-07821246ec06">
+3. We are going to create a Lambda Layer. Create a new folder `group_subscription_layer` and inside create `utils` python package. It is a folder with `__init__.py` file.
+<img width="158" alt="CleanShot 2023-05-16 at 16 08 08@2x" src="https://github.com/aws-hebrew-book/building-serverless-using-iac/assets/110536677/4b775466-b89a-456b-bc86-5c2176c7d198">
 
 5. Paste 
 ```
@@ -319,14 +319,14 @@ def require_group(function):
 
     return wrapper
 ```
-into `user-group/utils/api_gw_helpers.py`
+into `group_subscription_layer/utils/api_gw_helpers.py`
 
 5. Paste 
 ```
 import os
 SUBSCRIBERS_TABLE = os.environ["SUBSCRIBERS_TABLE"]
 ``` 
-into `user-group/utils/consts.py`
+into `group_subscription_layer/utils/consts.py`
 
 6. Add
 ```
@@ -368,9 +368,15 @@ AddSubscriberFunction:
             Path: /{group}/subscribers
             Method: post
 ```
-to `user-group/template.yaml` under `Resources`
+to `template.yaml` under `Resources`
 
-7. Simplify `user-group/get_subscribers/app.py`
+7. Add
+```
+Layers: 
+	- !Ref SharedLayer
+```
+to under `template.yaml` under `GetSubscribersFunction` function definition.
+9. Simplify `get_subscribers/app.py`
 ```
 import json
 import boto3
@@ -394,9 +400,15 @@ def lambda_handler(event, context):
     )
     return lambda_response(response['Items'])
 ```
-8. Talk about Layers [why we need, python path, removal of req.txt] - TBD
-9. `sam build && sam deploy`
-10. Test it using curl
+8. Delete `requirements.txt` from `get_subscribers` and `add_subscriber`. We are using a Lambda Layer which will hold our requirements.
+9. Paste 
+```
+boto3==1.21.37
+``` 
+into `group_subscription_layer/requirements.txt`
+
+10. `sam build && sam deploy`
+11. Test it using curl
 ```
 curl -X POST https://<api-id>.execute-api.<region>.amazonaws.com/Prod/serverless/subscribers -H 'Content-Type: application/json' -d '{"email":"mymail@mail.com"}'
 curl https://<api-d>.execute-api.<region>.amazonaws.com/Prod/serverless/subscribers
@@ -404,7 +416,9 @@ curl https://<api-d>.execute-api.<region>.amazonaws.com/Prod/serverless/subscrib
 Replace **api-id** and **region** with the relevent code you can copy from the output 
 This will create a new mailing list named `serverless` and add a new subscriber to it.
 
-### Insights
+<details>
+  <summary>👂 Speaker Notes</summary>
+	
 #### Python Decorators
 > A decorator is a function that takes another function and extends the behavior of the latter function without explicitly modifying it.
 
@@ -422,11 +436,26 @@ def lambda_handler(event, context):
  #### Permissions
 Just like the previous section, we are adhering to the Principle of Least Privilege Access here, granting the Lambda only write access to the table.
 
-#### Poor's man code sharing
+#### Lambda Layers
 > Lambda layers provide a convenient way to package libraries and other dependencies that you can use with your Lambda functions. Using layers reduces the size of uploaded deployment archives and makes it faster to deploy your code.
 
-The `utils` package is used across the project and we want to avoid duplicating it. A more ideal solution might involve using a [Lambda Layer](https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-concepts.html#gettingstarted-concepts-layer). However, to avoid adding extra complexity to the current project, we're using a Linux link to share the code.
+The utils package is utilized throughout the project, and our aim is to prevent its duplication. Moreover, our layer envelops all the necessary packages, thereby diminishing the size of the main Lambda. This results in:
+1. Expedited deployment
+2. The capability to inspect the code within the AWS Console.
+	
+By incorporating
+ 
+```
+Metadata:
+	BuildMethod: python3.7
+```
+into the layer specification, we are directing AWS SAM to construct the layer by installing the appropriate dependencies (utilizing pip in our scenario). Absence of this specification would result in AWS SAM merely zipping and deploying the layer, without any dependency installation.
+	
+You can view the layer in the AWS Console.
+![CleanShot 2023-05-25 at 13 34 54@2x](https://github.com/aws-hebrew-book/building-serverless-using-iac/assets/110536677/7c3cfe9f-f593-4041-8b33-f4d9eb89b6b4)
 
+
+	
 #### API Gateway response
 API Gateway requires a specific response structure:
 ```
@@ -441,6 +470,8 @@ Here, `statusCode` and `body` are mandatory, while `headers` are optional. If yo
 
 To simplify our code, this functionality has been encapsulated in the `utils` package.
 
+</details>
+	
 ## Step 3 - Schedule a message
 1. Duplicate `get_subscribers` and rename the new folder `schedule_message`
 2. Paste
@@ -534,7 +565,7 @@ into `app.py`
 boto3==1.21.37
 dacite==1.6.0
 ```
-into `group_subscription_layer/python/utils/requirements.txt`
+into `group_subscription_layer/utils/requirements.txt`
 
 4. Paste
 ```
@@ -545,9 +576,9 @@ def get_schedule_date_key(exact_date:datetime) -> str:
     return f"{exact_date.year}_{exact_date.month}_{exact_date.day}_{exact_date.hour}"
 
 ```
-into `group_subscription_layer/python/utils/general.py`
+into `group_subscription_layer/utils/general.py`
 
-5. Add to `user-group/template.yaml`
+5. Add to `template.yaml`
 Under Resources
 ```
 ScheduleFunction:
@@ -562,9 +593,13 @@ ScheduleFunction:
         - DynamoDBWritePolicy:
             TableName:
               !Ref ScheduledMessagesTable
-        - S3FullAccessPolicy:
-            BucketName:
-              !Ref ScheduledMessagesBucket
+        - S3WritePolicy:
+            BucketName: !Ref ScheduledMessagesBucket
+        - Statement:
+            - Effect: "Allow"
+              Action:
+                - "s3:PutObjectTagging"
+              Resource: !Sub "arn:aws:s3:::${ScheduledMessagesBucket}/*"
 
       Layers: 
         - !Ref SharedLayer
@@ -629,7 +664,7 @@ SUBSCRIBERS_TABLE = os.environ.get("SUBSCRIBERS_TABLE")
 SCHEDULED_MESSAGES_TABLE = os.environ.get("SCHEDULED_MESSAGES_TABLE_NAME")
 SCHEDULED_MESSAGES_BUCKET = os.environ.get("SCHEDULED_MESSAGES_BUCKET_NAME") 
 ```
-into `group_subscription_layer/python/utils/consts.py`
+into `group_subscription_layer/utils/consts.py`
 
 7. Rerun `sam build && sam deploy`.
 
@@ -637,37 +672,43 @@ into `group_subscription_layer/python/utils/consts.py`
 `curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/serverless/schedule -H 'Content-Type: application/json' -d '{"subject":"Hello SLS workshop!", "body":"The workshop is not recorded.<h1>Welcome dear friends</h1>", "schedule_on":1649753447000}'`
 9. Search for the file on the S3 bucket and the record in DynamoDB.
 
-### Insights
-#### Using S3 to store content
-DynamoDB has a strict size limit of 400KB per record. Therefore, when storing content that exceeds this limit, it is recommended to use S3 to store the content and use a 'pointer' (an S3 object path) to the full content, as part of the DynamoDB record. In the above code, we are saving content into S3 and storing the object key as part of the DynamoDB record.
-```
-bucket.put_object(Body=str.encode(body), Key=key, Tagging=tagging) # <-- Save to S3
-logger.info("S3 object saved successfully")
-response = table.put_item(
-   Item={
-        "group_name": group,
-        "scheduled_date": message.schedule_on,
-        "message_key": key, # <-- Use key
-        "message_added": int(datetime.now().timestamp() * 1000)
-    }
-)
-```
+	<details>
+  	<summary>👂 Speaker Notes</summary>	
+	
+	#### Using S3 to store content
+	DynamoDB has a strict size limit of 400KB per record. Therefore, when storing content that exceeds this limit, it is recommended to use S3 to store the content and use a 'pointer' (an S3 object path) to the full content, as part of the DynamoDB record. In the above code, we are saving content into S3 and storing the object key as part of the DynamoDB record.
+	```
+	bucket.put_object(Body=str.encode(body), Key=key, Tagging=tagging) # <-- Save to S3
+	logger.info("S3 object saved successfully")
+	response = table.put_item(
+	   Item={
+		"group_name": group,
+		"scheduled_date": message.schedule_on,
+		"message_key": key, # <-- Use key
+		"message_added": int(datetime.now().timestamp() * 1000)
+	    }
+	)
+	```
 
-#### Tagging S3 objects
-AWS Tags are a valuable feature in AWS. I highly recommend making use of them wherever possible, as they can aid in [cost optimization](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/cost-alloc-tags.html) and [compliance](https://docs.aws.amazon.com/config/latest/developerguide/tagging.html).
+	#### Tagging S3 objects
+	AWS Tags are a valuable feature in AWS. I highly recommend making use of them wherever possible, as they can aid in [cost optimization](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/cost-alloc-tags.html) and [compliance](https://docs.aws.amazon.com/config/latest/developerguide/tagging.html).
 
-In addition to tagging resources, you can also tag your S3 objects, which serves several purposes:
-* An easy way to understand the content of the object without actually downloading and opening it.
-* Identify large objects in S3, manage their costs, and control their [life cycle](https://aws.amazon.com/blogs/storage/simplify-your-data-lifecycle-by-using-object-tags-with-amazon-s3-lifecycle/)
-* [Access control](https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html)
+	In addition to tagging resources, you can also tag your S3 objects, which serves several purposes:
+	* An easy way to understand the content of the object without actually downloading and opening it.
+	* Identify large objects in S3, manage their costs, and control their [life cycle](https://aws.amazon.com/blogs/storage/simplify-your-data-lifecycle-by-using-object-tags-with-amazon-s3-lifecycle/)
+	* [Access control](https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html)
 
-Tagging S3 objects has some limitations on the types of characters that are allowed as part of your key and value content. For example, characters like `!` or `@` are not allowed. In cases like this, you can encode your string to eliminate these characters
+	Tagging S3 objects has some limitations on the types of characters that are allowed as part of your key and value content. For example, characters like `!` or `@` are not allowed. In cases like this, you can encode your string to eliminate these characters
 
-![CleanShot 2023-05-16 at 17 19 34@2x](https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/23bf743f-5fb7-4cb3-8df0-d1d1c19c08bc)
+	![CleanShot 2023-05-16 at 17 19 34@2x](https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/23bf743f-5fb7-4cb3-8df0-d1d1c19c08bc)
 
-
+	#### Principle of Least Priviliged Access - Take 2
+	Sometimes AWS SAM does not have the right predefined IAM policies, in cases like that you should define your own policy. In our case in order to write an S3 object tag, you need `PutObjectTagging` permission, AWS SAM does not provide one, the only one it does provide is `S3FullAccessPolicy` which is too permissive.
+	</detail>
+	
 
 ## Step 4 - Send a message
+	
 1. Duplicate `get_subscribers` and rename the new folder `send_scheduled_messages`
 
 3. Paste
