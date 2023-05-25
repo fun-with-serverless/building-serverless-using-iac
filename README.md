@@ -794,8 +794,6 @@ into `app.py`
 
 4. Add
 ```
-from boto3.dynamodb.conditions import Key
-
 def get_subscribers_by_group(subscribers_table, group:str) -> list:
     return subscribers_table.query(KeyConditionExpression=Key('group_name').eq(group))["Items"] 
 ```
