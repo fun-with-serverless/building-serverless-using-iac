@@ -33,9 +33,13 @@ Resources:
         - DynamoDBWritePolicy:
             TableName:
               !Ref ScheduledMessagesTable
-        - S3FullAccessPolicy:
-            BucketName:
-              !Ref ScheduledMessagesBucket
+        - S3WritePolicy:
+            BucketName: !Ref ScheduledMessagesBucket
+        - Statement:
+            - Effect: "Allow"
+              Action:
+                - "s3:PutObjectTagging"
+              Resource: !Sub "arn:aws:s3:::${ScheduledMessagesBucket}/*"
 
       Layers: 
         - !Ref SharedLayer
