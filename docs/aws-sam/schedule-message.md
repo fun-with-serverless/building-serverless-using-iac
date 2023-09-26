@@ -1,7 +1,10 @@
+Schedule content to be sent at a specific hour and date to all the subscribers of a specific group.
+
 ## Implementation
-1. Duplicate `get_subscribers` and rename the new folder `schedule_message`
-2. Paste
-``` py
+* Duplicate `get_subscribers` and rename the new folder `schedule_message`
+* Paste
+
+``` { .py .annotate }
 import json
 import boto3
 from datetime import datetime
@@ -28,7 +31,7 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True) #(1)!
 class Message:
     subject: str
     body: str
@@ -53,7 +56,7 @@ def lambda_handler(event, context):
                 "scheduled": str(datetime.fromtimestamp(message.schedule_on / 1000)),
                 "key": key,
             }
-            tagging = "&".join(
+            tagging = "&".join( #(2)!
                 f"{k}={_filter_string(str(v))}" for k, v in meta_data.items()
             )
             logger.info(tagging)
@@ -84,16 +87,20 @@ def _filter_string(s: str):
     return re.sub(r"[^\w\s\+\-=:\/@\.]", "", s)
 
 ```
+
+1. Encapsulate data as a model.
+2. Not all tage values are valid.
+
 into `app.py`
 
-3. Paste
+* Paste
 ```
 boto3==1.21.37
 dacite==1.6.0
 ```
 into `group_subscription_layer/utils/requirements.txt`
 
-4. Paste
+* Paste
 ``` py
 from datetime import datetime
 from boto3.dynamodb.conditions import Key
@@ -104,15 +111,16 @@ def get_schedule_date_key(exact_date:datetime) -> str:
 ```
 into `group_subscription_layer/utils/general.py`
 
-5. Add to `template.yaml`
+* Add to `template.yaml`
 Under Resources
-``` yaml
+
+``` { .yaml .annotate }
 ScheduleFunction:
     Type: AWS::Serverless::Function 
     Properties:
       CodeUri: schedule_message/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Architectures:
         - x86_64
       Policies:
@@ -121,7 +129,7 @@ ScheduleFunction:
               !Ref ScheduledMessagesTable
         - S3WritePolicy:
             BucketName: !Ref ScheduledMessagesBucket
-        - Statement:
+        - Statement: #(1)!
             - Effect: "Allow"
               Action:
                 - "s3:PutObjectTagging"
@@ -140,6 +148,10 @@ ScheduleFunction:
             Path: /{group}/schedule
             Method: post
 ```
+
+1. Use a manually defined policy.
+
+
 
 Add new S3 bucket definition
 ``` yaml
@@ -182,7 +194,7 @@ Outputs:
     Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/schedule"
 ```
 
-6. Paste 
+* Paste 
 ``` py
 import os
 
@@ -192,11 +204,11 @@ SCHEDULED_MESSAGES_BUCKET = os.environ.get("SCHEDULED_MESSAGES_BUCKET_NAME")
 ```
 into `group_subscription_layer/utils/consts.py`
 
-7. Rerun `sam build && sam deploy`.
+* Rerun `sam build && sam deploy`.
 
-8. Test it using curl
+* Test it using curl
 `curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/serverless/schedule -H 'Content-Type: application/json' -d '{"subject":"Hello SLS workshop!", "body":"The workshop is not recorded.<h1>Welcome dear friends</h1>", "schedule_on":1649753447000}'`
-9. Search for the file on the S3 bucket and the record in DynamoDB.
+* Search for the file on the S3 bucket and the record in DynamoDB.
 
 ## Insights
 #### Using S3 to store content
@@ -230,3 +242,11 @@ Tagging S3 objects has some limitations on the types of characters that are allo
 Stop reinventing the wheel. AWS Lambda Power Tools is a suite of utilities for AWS Lambda functions that makes it easier for developers to follow best practices for tracing, structured logging, custom metrics, and more. You can find more details [here](https://awslabs.github.io/aws-lambda-powertools-python/2.15.0/)
 #### Principle of Least Priviliged Access - Take 2
 There may be instances where AWS SAM doesn't supply the exact IAM policies you require. In such situations, it becomes necessary to formulate your own policy. For our specific scenario, we need the `PutObjectTagging` permission to write an S3 object tag. Unfortunately, AWS SAM doesn't offer this particular policy. The only available option is the `S3FullAccessPolicy`, which is excessively broad for our needs.
+
+## Exercies
+* Add Lambda Power Tools and replace the existing log statements with those provided by Power Tools.
+* Why did we choose to structure the DynamoDB table the way we did?
+* Replace the `DynamoDBWritePolicy` policy with a manually defined policy that only allows the `dynamodb:PutItem` operation.
+??? tip
+    1. Each policy has a strict structure; adhere to it.
+    2. Define `Effect`, `Action` and `Resource`

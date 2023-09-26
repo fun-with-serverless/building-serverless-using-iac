@@ -17,23 +17,23 @@ By leveraging AWS SAM, you can more easily automate deployment processes, test y
 
 In the following section we will build a simple hello world application using SAM.
 
-1. `sam init`
-2. Choose `AWS Quick Start Templates`
-3. Next choose `Hello World Example`
-4. If you choose to use the most popular runtime and package type, then make sure that Python 3.9 is installed
-6. Choose `Python 3.11`
-7. Choose `Zip`
-8. For project name, choose the default
+* `sam init`
+* Choose `AWS Quick Start Templates`
+* Next choose `Hello World Example`
+* If you choose to use the most popular runtime and package type, then make sure that Python 3.9 is installed
+* Choose `Python 3.11`
+* Choose `Zip`
+* For project name, choose the default
 <img src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/4bf1a5ca-cdbe-455b-a29d-2ce4a4ddddf0" width="400">
 
-10. You need to build the sam packge 
-11. Go to the folder the template created `cd sam-app`
-12. Run `sam build` and next run `sam deploy --guided`. You should run guided each time you want to add something to the sam configuration file or create it for the first time.
-13. When asked `HelloWorldFunction may not have authorization defined, Is this okay?` choose `y`
-14. The rest can be defaults
-15. `Deploy this changeset?` choose `y`
-16. Give the deployment a try, you should see under `Outputs` the `API Gateway endpoint URL`, copy the URL and try it on browser.
-17. When done, run `sam delete` to remove the stack.
+* You need to build the sam packge 
+* Go to the folder the template created `cd sam-app`
+* Run `sam build` and next run `sam deploy --guided`. You should run guided each time you want to add something to the sam configuration file or create it for the first time.
+* When asked `HelloWorldFunction may not have authorization defined, Is this okay?` choose `y`
+* The rest can be defaults
+* `Deploy this changeset?` choose `y`
+* Give the deployment a try, you should see under `Outputs` the `API Gateway endpoint URL`, copy the URL and try it on browser.
+* When done, run `sam delete` to remove the stack.
 
 ## Insights
 
@@ -96,3 +96,4 @@ A key advantage of AWS SAM is its seamless integration with other services. For 
     2. In the Lambda handler, extract the path parameter using the following code - `event.get("pathParameters", {}).get("name")`
 
 * Add a new Python Lambda to the template that returns "Mama Mia" in its response.
+* What is the purpose of `sam build`? Can you locate its artifacts?

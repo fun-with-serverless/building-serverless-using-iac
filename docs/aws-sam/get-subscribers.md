@@ -3,10 +3,10 @@
 The "Get Subscribers" function returns a list of all email addresses that have subscribed to a specific mailing list.
 
 ## Implementation
-1. Go to `start-here-step1`
-3. You should see a basic structure of our SAM aplication for managing user groups.
-5. Add `boto3==1.21.37` to `get_subscribers/requirements.txt`
-6. Paste
+* Go to `start-here-step1`
+* You should see a basic structure of our SAM aplication for managing user groups.
+* Add `boto3==1.21.37` to `get_subscribers/requirements.txt`
+* Paste
 
 ```{ .yaml .annotate }
 AWSTemplateFormatVersion: '2010-09-09'
@@ -78,7 +78,8 @@ Outputs:
 into `template.yaml`
 
 
-7. Paste 
+* Paste 
+
 ``` { .py .annotate }
 import json
 import os
@@ -114,12 +115,12 @@ def lambda_handler(event, context):
 
 into `app.py`
 
-8. Build and deploy `sam build`
-9. `sam deploy --guided`. Use `user-groups` as stack name
+* Build and deploy `sam build`
+* `sam deploy --guided`. Use `user-groups` as stack name
 
 ### Add a new group with subscribers
-1. Use the DynamoDB console to add a new group with multiple subscribers
-2. Make an API call and get back results
+* Use the DynamoDB console to add a new group with multiple subscribers
+* Make an API call and get back results
 <img width="1320" alt="CleanShot 2023-05-16 at 14 29 16@2x" src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/8349b69a-9370-4150-950b-7273c705ee70">
 
 ## Insights

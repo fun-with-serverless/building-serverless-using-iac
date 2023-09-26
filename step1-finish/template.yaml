@@ -13,7 +13,7 @@ Resources:
     Properties:
       CodeUri: get_subscribers/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Environment:
         Variables:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable

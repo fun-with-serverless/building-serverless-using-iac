@@ -1,8 +1,12 @@
-## Implementation
-1. Duplicate `get_subscribers` and rename the new folder `send_scheduled_messages`
 
-3. Paste
-``` py
+Trigger a Lambda every hour to send the scheduled messages.
+
+## Implementation
+* Duplicate `get_subscribers` and rename the new folder `send_scheduled_messages`
+
+* Paste
+
+``` { .py .annotate }
 import json
 import boto3
 from datetime import datetime
@@ -27,8 +31,9 @@ def lambda_handler(event, context):
     try:
         now = datetime.now()
         logger.info("Checking in DB for relevant messages")
+        #(1)!
         responses = scheduled_messages_table.query(KeyConditionExpression=Key('scheduled_date').eq(get_schedule_date_key(now)))["Items"]
-        messages_to_send = [response for response in responses if response.get("sent") is None ]
+        messages_to_send = [response for response in responses if response.get("sent") is None ] #(2)!
         logger.info(f"Found {len(messages_to_send)} messages")
         _send_email_to_subscribers(messages_to_send, s3, SCHEDULED_MESSAGES_BUCKET)
 
@@ -82,16 +87,20 @@ def _send_email_to_subscribers(scheduled_messages:List[dict], s3, bucket:str):
         content = from_dict(data_class=Message, data = json.loads(_get_s3_content(s3, bucket, message["message_key"])))
         _send_email([subscriber["subscriber"] for subscriber in subscribers], content)
 ```
+
+1. A query returns a list, unlike a regular get operation. A query operates on a specific hash key and retrieves all values with different range keys.
+2. Add support for idempotency.
+
 into `app.py`
 
-4. Add
+* Add
 ``` py
 def get_subscribers_by_group(subscribers_table, group:str) -> list:
     return subscribers_table.query(KeyConditionExpression=Key('group_name').eq(group))["Items"] 
 ```
 into `group_subscription_layer/utils/general.py`
 
-5. Paste
+* Paste
 ``` py
 from dataclasses import dataclass
 
@@ -103,13 +112,13 @@ class Message:
 ```
 into `group_subscription_layer/utils/models.py`
 
-6. Add
+* Add
 ``` py
 SOURCE_EMAIL = os.environ.get("SOURCE_EMAIL")
 ```
 to `group_subscription_layer/utils/consts.py`
 
-7. Paste
+* Paste
 ``` py
 import json
 import boto3
@@ -131,8 +140,9 @@ def lambda_handler(event, context):
 ```
 into `get_subscribers/app.py`
 
-9. Add to `user-group/template.yaml`
-``` yaml
+* Add to `user-group/template.yaml`
+
+``` { .yaml .annotate }
 SendScheduledMessagesFunction:
     Type: AWS::Serverless::Function 
     Properties:
@@ -162,11 +172,16 @@ SendScheduledMessagesFunction:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
       Events:
         MessageRule:
-          Type: Schedule
+          Type: Schedule #(1)!
           Properties:
-            Schedule: 'rate(1 hour)'
+            Schedule: 'rate(1 hour)' #(2)!
             Name: MessageRule
 ```
+
+1. Many events can trigger a Lambda; a scheduled event is one of them.
+2. You can use also a cron string.
+
+
 Under the `Resources` section 
 
 
@@ -211,7 +226,7 @@ There are multiple ways to schedule events in AWS:
 * The recently added [AWS Scheduler](https://docs.aws.amazon.com/scheduler/latest/UserGuide/what-is-scheduler.html) service.
 
 ## Exercise
-1. Add the missing permission, redeploy and retest it.
+* Add the missing permission, redeploy and retest it.
 ??? tip
     add the missing permission. Add
     ```
@@ -220,3 +235,10 @@ There are multiple ways to schedule events in AWS:
             !Ref SourceEmail
     ```
     Under policies for the `SendScheduledMessagesFunction` Lambda
+* Replace the `Schedule` attribute with an identical cron string.
+* Replace the scheduling mechanism with `AWS Scheduler`
+??? tip
+    Use `ScheduleV2`
+* Use the Lambda Power Tools to add event source data classes to the API Gatway Lambdas.
+??? tip
+    Follow https://docs.powertools.aws.dev/lambda/python/latest/utilities/data_classes/#api-gateway-proxy

@@ -15,18 +15,16 @@ Resources:
       Description: Utility layer used by subscription application
       ContentUri: group_subscription_layer/
       CompatibleRuntimes:
-        - python3.10
-        - python3.9
-        - python3.7
+        - python3.11
     Metadata:
-      BuildMethod: python3.7
+      BuildMethod: python3.11
 
   ScheduleFunction:
     Type: AWS::Serverless::Function 
     Properties:
       CodeUri: schedule_message/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Architectures:
         - x86_64
       Policies:
@@ -59,7 +57,7 @@ Resources:
     Properties:
       CodeUri: add_subscriber/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Environment:
         Variables:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
@@ -83,7 +81,7 @@ Resources:
     Properties:
       CodeUri: get_subscribers/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Environment:
         Variables:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable

@@ -1,7 +1,12 @@
+## Architecture
+
+The "Add Subscribers" function adds a single subscriber to a mailing list.
+
 ## Implementation
-1. Duplicate `get_subscribers` and rename the new folder `add_subscriber`
-2. Paste
-```
+* Duplicate `get_subscribers` and rename the new folder `add_subscriber`
+* Paste
+
+```{ .py .annotate }
 import json
 import boto3
 from datetime import datetime
@@ -14,10 +19,10 @@ session = boto3.Session()
 dynamodb = session.resource("dynamodb")
 table = dynamodb.Table(SUBSCRIBERS_TABLE)
 
-@require_group
+@require_group #(1)!
 def lambda_handler(event, context):
     # Get group name
-    group = event["group_name"]
+    group = event["group_name"] #(2)!
     email = json.loads(event.get("body", {})).get("email")
     if email:
         response = table.put_item(
@@ -28,17 +33,22 @@ def lambda_handler(event, context):
             }
         )
 
-        return lambda_response({"message":f"{email} added successfully"})
+        return lambda_response({"message":f"{email} added successfully"}) #(3)!
 
     return lambda_response({"err":"Email not found"}, status_code=500)
 ```
+
+1. Use annotations to encapsulate common behavior.
+2. The annotation pushes this attribute into the dictionary.
+3. Encapsulate the API Gateway return value.
+
 into `app.py`
 
-3. We are going to create a Lambda Layer. Create a new folder `group_subscription_layer` and inside create `utils` python package. It is a folder with `__init__.py` file.
+* We are going to create a Lambda Layer. Create a new folder `group_subscription_layer` and inside create `utils` python package. It is a folder with `__init__.py` file.
 <img width="158" alt="CleanShot 2023-05-16 at 16 08 08@2x" src="https://github.com/aws-hebrew-book/building-serverless-using-iac/assets/110536677/4b775466-b89a-456b-bc86-5c2176c7d198">
 
-5. Paste 
-```
+* Paste 
+``` { .py .annotate }
 import json 
 from typing import Callable, Any, Optional, List, Dict, Union
 
@@ -96,34 +106,33 @@ def require_group(function):
 ```
 into `group_subscription_layer/utils/api_gw_helpers.py`
 
-5. Paste 
-```
+* Paste 
+```py
 import os
 SUBSCRIBERS_TABLE = os.environ["SUBSCRIBERS_TABLE"]
 ``` 
 into `group_subscription_layer/utils/consts.py`
 
-6. Add
-```
+* Add
+
+``` { .yaml .annotate }
 SharedLayer:
-    Type: AWS::Serverless::LayerVersion
+    Type: AWS::Serverless::LayerVersion #(1)!
     Properties:
       LayerName: group-subscription-layer
       Description: Utility layer used by subscription application
       ContentUri: group_subscription_layer/
-      CompatibleRuntimes:
-        - python3.10
-        - python3.9
-        - python3.7
+      CompatibleRuntimes: #(2)!
+        - python3.11
     Metadata:
-      BuildMethod: python3.7
+      BuildMethod: python3.11 #(3)!
 
 AddSubscriberFunction:
     Type: AWS::Serverless::Function 
     Properties:
       CodeUri: add_subscriber/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Environment:
         Variables:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
@@ -135,7 +144,7 @@ AddSubscriberFunction:
               !Ref SubscribersTable
 
       Layers: 
-        - !Ref SharedLayer
+        - !Ref SharedLayer #(4)!
       Events:
         Subscribers:
           Type: Api 
@@ -143,16 +152,22 @@ AddSubscriberFunction:
             Path: /{group}/subscribers
             Method: post
 ```
+
+1. Lambda Layer also has a resource type.
+2. Which Lambda runtimes can attach the Layer. In our case, it's only one, but you can build the layer using Python 3.9, for example, and support other Python versions as well.
+3. We tell AWS SAM how to build and package the layer. Specifically, here we use a standard Python build, which means using `pip`.
+4. We attache the layer to the Lambda.
+
 to `template.yaml` under `Resources`
 
-7. Add
+* Add
 ```
 Layers: 
 	- !Ref SharedLayer
 ```
 to under `template.yaml` under `GetSubscribersFunction` function definition.
 9. Simplify `get_subscribers/app.py`
-```
+```py
 import json
 import boto3
 from boto3.dynamodb.conditions import Key
@@ -220,13 +235,12 @@ By incorporating
  
 ``` yaml
 Metadata:
-	BuildMethod: python3.7
+	BuildMethod: python3.11
 ```
 into the layer specification, we are directing AWS SAM to construct the layer by installing the appropriate dependencies (utilizing pip in our scenario). Absence of this specification would result in AWS SAM merely zipping and deploying the layer, without any dependency installation.
 	
 You can view the layer in the AWS Console.
 ![CleanShot 2023-05-25 at 13 34 54@2x](https://github.com/aws-hebrew-book/building-serverless-using-iac/assets/110536677/7c3cfe9f-f593-4041-8b33-f4d9eb89b6b4)
-
 
 	
 #### API Gateway response
@@ -242,3 +256,15 @@ API Gateway requires a specific response structure:
 Here, `statusCode` and `body` are mandatory, while `headers` are optional. If you do not return this response structure when integrating with API Gateway, your client will receive a 502 HTTP error.
 
 To simplify our code, this functionality has been encapsulated in the `utils` package.
+
+## Exercises
+* Add Python 3.10 to the list of supported runtimes for the layer.
+??? tip
+    1. Install python 3.10 using pyenv
+    2. Then add the missing runtime.
+* Add first and surname to the body of the `add-subscriber` lambda and then add these values to the DynamoDB table. Do you need to add these attributes to the table definition?
+??? tip
+    You only need to add attributes to the table definition if they are either the hash key or the range key.
+* Try removing the the `statusCode` attribute from the API Gateway response. Invoke the Lambda through the console, now try through the API. What happens? Why?
+??? tip
+    The Lambda will run successfully, but the the integration between the Lambda and the API Gateway will fail, resulting in an invalid response. Any idea how to debug it? :wink:
