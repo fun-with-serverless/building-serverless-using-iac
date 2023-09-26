@@ -21,7 +21,7 @@ In the following section we will build a simple hello world application using SA
 2. Choose `AWS Quick Start Templates`
 3. Next choose `Hello World Example`
 4. If you choose to use the most popular runtime and package type, then make sure that Python 3.9 is installed
-6. Choose `Python 3.7`
+6. Choose `Python 3.11`
 7. Choose `Zip`
 8. For project name, choose the default
 <img src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/4bf1a5ca-cdbe-455b-a29d-2ce4a4ddddf0" width="400">
@@ -54,9 +54,45 @@ At the core of every AWS SAM application lies the template.yaml, a file that out
       Outputs - This section enumerates output values that can be imported into other stacks (for creating cross-stack references), returned in responses (to provide stack call descriptions), or viewed on the AWS CloudFormation console.
     </li>
   </ol>
+
+The heart of your AWS SAM template file is the resource section, let's deep dive into its content.
+
+
+```{ .yaml .annotate }
+HelloWorldFunction: #(1)!
+    Type: AWS::Serverless::Function #(2)!
+    Properties:
+      CodeUri: hello_world/ #(3)!
+      Handler: app.lambda_handler #(4)!
+      Runtime: python3.11
+      Architectures:
+        - x86_64
+      Events: #(5)!
+        HelloWorld:
+          Type: Api #(6)!
+          Properties: #(7)!
+            Path: /hello 
+            Method: get
+```
+
+1. This is the logical ID for the Lambda function.
+2. Specifies that the resource is a Lambda function. There are many different resource types.
+3. The directory where the Lambda function code resides.
+4. Specifies the entry point for the Lambda function.
+5. This section defines the event sources that will trigger the Lambda function.
+6. Specifies that this event is an API Gateway event.
+7. The API endpoint and the HTTP method.
 	
 ### Simplicity
 With AWS SAM, defining a Lambda function is as straightforward as pointing to a directory containing your code. AWS SAM then takes care of bundling the folder's contents along with the necessary dependencies into a zip file, and uploading it to AWS. It also automatically generates the appropriate IAM roles for you during this process.
   
 ### Interoperability
 A key advantage of AWS SAM is its seamless integration with other services. For instance, in our example, we've integrated our Lambda function with API Gateway, demonstrating the simplicity of combining AWS services in a SAM application.
+
+## Exercises
+* Accept a path parameter that contains your name, and when calling the endpoint, it will return the specified name - `hello <path parameter>`. For example calling `https://apigw-url/hello/efi` will return `hello efi`.
+??? tip
+    1. Add `/{name}` to the path
+    2. In the Lambda handler, extract the path parameter using the following code - `event.get("pathParameters", {}).get("name")`
+
+* Add a new Python Lambda to the template that returns "Mama Mia" in its response.

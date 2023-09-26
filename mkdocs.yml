@@ -11,6 +11,7 @@ theme:
     - header.autohide
     - navigation.footer
     - content.action.edit
+    - content.code.annotate
   icon:
     logo: material/test-tube
     favicon: images/test-tube.svg

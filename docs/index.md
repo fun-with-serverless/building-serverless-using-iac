@@ -13,3 +13,5 @@ We are going to build the same application using AWS SAM and CDK, learning along
 * Individuals with development experience, preferably in Python, although Python knowledge is not mandatory.
 * Those who have worked with AWS services in the past and possess an AWS environment for use.
 * People who have experience with serverless services such as AWS Lambda, S3, and DynamoDB.
+
+To gain the full benefits from the workshop, it's recommended that you complete all the exercises.

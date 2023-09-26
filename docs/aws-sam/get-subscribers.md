@@ -1,9 +1,14 @@
+## Architecture
+
+The "Get Subscribers" function returns a list of all email addresses that have subscribed to a specific mailing list.
+
 ## Implementation
 1. Go to `start-here-step1`
 3. You should see a basic structure of our SAM aplication for managing user groups.
 5. Add `boto3==1.21.37` to `get_subscribers/requirements.txt`
 6. Paste
-``` yaml
+
+```{ .yaml .annotate }
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
@@ -11,7 +16,7 @@ Description: >
   User group functionality
 Globals:
   Function:
-    Timeout: 10
+    Timeout: 10 #(1)!
 
 Resources:
   GetSubscribersFunction:
@@ -21,11 +26,11 @@ Resources:
       Handler: app.lambda_handler
       Runtime: python3.7
       Environment:
-        Variables:
+        Variables: #(2)!
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
       Architectures:
         - x86_64
-      Policies:
+      Policies: #(3)!
         - DynamoDBReadPolicy:
             TableName:
               !Ref SubscribersTable
@@ -34,20 +39,20 @@ Resources:
         Subscribers:
           Type: Api 
           Properties:
-            Path: /{group}/subscribers
+            Path: /{group}/subscribers #(4)!
             Method: get
   
   SubscribersTable:
-    Type: AWS::DynamoDB::Table
+    Type: AWS::DynamoDB::Table #(5)!
     Properties:
-      AttributeDefinitions: 
+      AttributeDefinitions: #(6)!
         - 
           AttributeName: "group_name"
           AttributeType: "S"
         - 
           AttributeName: "subscriber"
           AttributeType: "S"
-      KeySchema: 
+      KeySchema: #(7)!
         - 
           AttributeName: "group_name"
           KeyType: "HASH"
@@ -57,14 +62,24 @@ Resources:
       BillingMode: PAY_PER_REQUEST
 Outputs:
   SubscribersApi:
-    Description: "API Gateway endpoint URL for Prod stage for subscribers"
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/subscribers"
+    Description: "API Gateway endpoint URL for Prod stage for subscribers" #(8)!
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/{group}/subscribers" 
 ```
+
+1. Define how long a Lambda can run before receiving a timeout event. This can be set per Lambda function, or, as in our case, defined globally.
+2. Environment variables are useful for defining static configurations.
+3. Specify the security permissions for the Lambda, adhering to the principle of Least Privilege.
+4. Define a path parameter.
+5. Create a new DynamoDB table. If you're curious about the properties available for each resource type, a quick Google search will likely lead you to the official AWS documentation.
+6. Define the DynamoDB attributes that make up your schema.
+7. Specify the schema, which includes a hash key and a range key.
+8. Add variables to your output to make it usable.
+
 into `template.yaml`
 
 
 7. Paste 
-``` py
+``` { .py .annotate }
 import json
 import os
 import boto3
@@ -78,10 +93,10 @@ SUBSCRIBERS_TABLE = os.environ.get("SUBSCRIBERS_TABLE")
 table = dynamodb.Table(SUBSCRIBERS_TABLE)
 def lambda_handler(event, context):
     # Get group name
-    group = event.get("pathParameters", {}).get("group")
+    group = event.get("pathParameters", {}).get("group") #(1)!
     if group:
         response = table.query(
-            KeyConditionExpression=Key('group_name').eq(group)
+            KeyConditionExpression=Key('group_name').eq(group) #(2)!
         )
         return {
             "statusCode": 200,
@@ -89,10 +104,14 @@ def lambda_handler(event, context):
         }
     else:
         return {
-            "statusCode": 500,
+            "statusCode": 500, 
             "body": "Missing group!",
         }
 ```
+
+1. The Lambda event contains all the details from the API Gateway call, including path parameters, query parameters, headers, and more. You can learn about the event content in the [official documentation](https://docs.aws.amazon.com/lambda/latest/dg/lambda-services.html).
+2. This is a range query that returns a list.
+
 into `app.py`
 
 8. Build and deploy `sam build`
@@ -127,3 +146,14 @@ Our Lambda function only requires ReadOnly access to the DynamoDB table we creat
 One of the benefits of AWS SAM is its ease of event-based integration with additional AWS services like SQS, SNS, API Gateway, etc. To add event integration, all you need to do is add an `Event` attribute with the relevant configuration.
 
 In our case, we are integrating with API Gateway. We define the base URL path using curly braces, like `/{group}/subscribers`. This means that whenever an external client accesses the API, it needs to supply the group it wants to pull. The integration here is proxy-based, so all paths and headers are passed directly to the Lambda function as part of the event variable. You can easily retrieve the path parameter by using `event.get("pathParameters", {}).get("group")` in the code.
+
+## Exercises
+* Remove the policy from the Lambda definition. Try invoking the Lambda. What happens, and why?
+??? tip
+    1. Use AWS CloudWatch to debug your Lambda function.
+    2. Type "CloudWatch" in the search bar, then go to "Logs" -> "Log Groups" and search for your Lambda function by name.
+* Improve the response JSON by adding an attribute that contains the number of items, in addition to the list itself.
+* Add the DynamoDB table name to the `Output` section of the `template.yaml` file.
+??? tip
+    1. Look at the Return values section in https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-dynamodb-table.html
+    2. Use `!Ref` or `!Sub` to pull the value.
