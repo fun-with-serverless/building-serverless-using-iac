@@ -83,7 +83,7 @@ nav:
   - Serverless:
     - What is Serverless: './serverless/what-is-serverless.md'
     - Known AWS Serverless Services: './serverless/serverless-services.md'
-    - What is IaC: './serverless/what-is-iac.md'
+  - What is IaC: './serverless/what-is-iac.md'
   - AWS SAM: 
     - Hello SAM 👋: './aws-sam/hello-sam.md'
     - Implement 'Get Subscribers': './aws-sam/get-subscribers.md'

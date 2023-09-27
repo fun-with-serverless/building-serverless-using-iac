@@ -1,11 +1,11 @@
 > Serverless computing is a cloud computing execution model in which the cloud provider allocates machine resources on demand, taking care of the servers on behalf of their customers. 
 
 
-[~Wikipedia~ ~(Serverless~ ~commputing)~](https://en.wikipedia.org/wiki/Serverless_computing)
+[~Wikipedia~ ~(Serverless~ ~computing)~](https://en.wikipedia.org/wiki/Serverless_computing)
 
-A Serverless service stands on two rules:
+Any serverless service is based on two key principles:
 
-* A cloud provider is managing its resources, you as a user, iteract with the service using APIs, usually, you don't have access to the underlying machines. It's transperent to you as a user what happens behind the scenes, the cloud provider can add or remove resources depending on your requests. Scaling is done automatically for you.
-* You pay on usage which means if you didn't use, then you won't pay anything. You can still provision a serverless service, but if you didn't do any API calls agaionst it, you won't pay a dime.
+* A cloud provider manages the resources, allowing you as a user to interact with the service via APIs. Typically, you don't have access to the underlying machines. The operational details are transparent to you; the cloud provider can add or remove resources based on your demand, handling scaling automatically.
+* You pay based on usage, meaning if you don't use the service, you don't incur any costs. While you can provision a serverless service, you won't be billed unless you make API calls against it.
 
-There are different Serverless services, usually AWS Lambda is a synonym to Serverless, however, every service that adheres to these rules is aa Serverless service. In the next section we will meet a couple of these services.
+Although AWS Lambda is often synonymous with serverless, any service that adheres to these principles is considered a serverless service. In the following section, we will explore several such services.
