@@ -2,6 +2,9 @@
 
 The "Get Subscribers" function returns a list of all email addresses that have subscribed to a specific mailing list.
 
+![get-subscribers](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/2a6c83f7-8988-4e32-9bae-cd69d6fc3843)
+
+
 ## Implementation
 * Go to `start-here-step1`
 * You should see a basic structure of our SAM aplication for managing user groups.
