@@ -42,7 +42,7 @@ jobs:
         role-session-name: GitHubActionsSession
     - name: Upload to S3
       run: |
-        aws s3 sync --delete ./site s3://building-serverless-using-iac/
+        aws s3 sync --delete ./site s3://building-serverless-using-iac-site/
         aws cloudfront create-invalidation --distribution-id $CF_DISTRIBUTION_ID_BUILDING_SERVERLESS_USING_AC --paths "/*"
       env:
         CF_DISTRIBUTION_ID: ${{ vars.CF_DISTRIBUTION_ID_BUILDING_SERVERLESS_USING_AC }}
