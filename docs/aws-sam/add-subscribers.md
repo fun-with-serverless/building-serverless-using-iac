@@ -1,6 +1,8 @@
 ## Architecture
 
 The "Add Subscribers" function adds a single subscriber to a mailing list.
+![add-subscriber](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/6368c1ac-98bb-4acf-be51-c5ea5e00feb1)
+
 
 ## Implementation
 * Duplicate `get_subscribers` and rename the new folder `add_subscriber`
