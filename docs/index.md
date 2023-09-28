@@ -29,12 +29,6 @@ The workshop is divided into four main parts:
 * Building the application from scratch using AWS SAM and Python. Each subsection focuses on constructing a different part of the application, covering both code and the relevant IaC.
 * Rebuilding the application using AWS CDK, based on the code developed in the AWS SAM section. This part solely focuses on the CDK aspect, as it assumes familiarity with the application's code.
 
+You can find the relevant code for each section in the repository. You have the option to either write the code from scratch or use the repository as a starting point.
+
 To get the most out of the workshop, it's recommended that you complete all the exercises.
-
-## Online access
-This workshop is available online on ...
-
-# 🖥️ How to run locally
-1. Make sure you have `poetry` installed.
-2. Run `poetry install`.
-3. Run `poetry run mkdocs serve` to have the workshop running locally.

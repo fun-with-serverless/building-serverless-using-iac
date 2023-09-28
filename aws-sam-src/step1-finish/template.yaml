@@ -8,49 +8,12 @@ Globals:
     Timeout: 10
 
 Resources:
-  SharedLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: group-subscription-layer
-      Description: Utility layer used by subscription application
-      ContentUri: group_subscription_layer/
-      CompatibleRuntimes:
-        - python3.10
-        - python3.9
-        - python3.7
-    Metadata:
-      BuildMethod: python3.7
-
-  AddSubscriberFunction:
-    Type: AWS::Serverless::Function 
-    Properties:
-      CodeUri: add_subscriber/
-      Handler: app.lambda_handler
-      Runtime: python3.7
-      Environment:
-        Variables:
-          SUBSCRIBERS_TABLE: !Ref SubscribersTable
-      Architectures:
-        - x86_64
-      Policies:
-        - DynamoDBWritePolicy:
-            TableName:
-              !Ref SubscribersTable
-      Layers: 
-        - !Ref SharedLayer
-      Events:
-        Subscribers:
-          Type: Api 
-          Properties:
-            Path: /{group}/subscribers
-            Method: post
-
   GetSubscribersFunction:
     Type: AWS::Serverless::Function 
     Properties:
       CodeUri: get_subscribers/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Environment:
         Variables:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
@@ -60,8 +23,7 @@ Resources:
         - DynamoDBReadPolicy:
             TableName:
               !Ref SubscribersTable
-      Layers: 
-        - !Ref SharedLayer
+      
       Events:
         Subscribers:
           Type: Api 

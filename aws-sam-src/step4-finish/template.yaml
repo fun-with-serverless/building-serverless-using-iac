@@ -6,6 +6,9 @@ Description: >
 Globals:
   Function:
     Timeout: 10
+Parameters:
+  SourceEmail:
+    Type: String
 
 Resources:
   SharedLayer:
@@ -15,31 +18,25 @@ Resources:
       Description: Utility layer used by subscription application
       ContentUri: group_subscription_layer/
       CompatibleRuntimes:
-        - python3.10
-        - python3.9
-        - python3.7
+        - python3.11
     Metadata:
-      BuildMethod: python3.7
+      BuildMethod: python3.11
 
   ScheduleFunction:
     Type: AWS::Serverless::Function 
     Properties:
       CodeUri: schedule_message/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Architectures:
         - x86_64
       Policies:
         - DynamoDBWritePolicy:
             TableName:
               !Ref ScheduledMessagesTable
-        - S3WritePolicy:
-            BucketName: !Ref ScheduledMessagesBucket
-        - Statement:
-            - Effect: "Allow"
-              Action:
-                - "s3:PutObjectTagging"
-              Resource: !Sub "arn:aws:s3:::${ScheduledMessagesBucket}/*"
+        - S3FullAccessPolicy:
+            BucketName:
+              !Ref ScheduledMessagesBucket
 
       Layers: 
         - !Ref SharedLayer
@@ -59,7 +56,7 @@ Resources:
     Properties:
       CodeUri: add_subscriber/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Environment:
         Variables:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
@@ -83,7 +80,7 @@ Resources:
     Properties:
       CodeUri: get_subscribers/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Environment:
         Variables:
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
@@ -102,13 +99,49 @@ Resources:
             Path: /{group}/subscribers
             Method: get
   
+  SendScheduledMessagesFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: send_scheduled_messages/
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Architectures:
+        - x86_64
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName:
+              !Ref ScheduledMessagesTable
+        - DynamoDBReadPolicy:
+            TableName:
+              !Ref SubscribersTable
+        - S3ReadPolicy:
+            BucketName:
+              !Ref ScheduledMessagesBucket
+        - SESCrudPolicy:
+            IdentityName:
+              !Ref SourceEmail
+
+      Layers: 
+        - !Ref SharedLayer
+      Environment:
+        Variables:
+          SCHEDULED_MESSAGES_BUCKET_NAME: !Ref ScheduledMessagesBucket
+          SOURCE_EMAIL: !Ref SourceEmail
+          SCHEDULED_MESSAGES_TABLE_NAME: !Ref ScheduledMessagesTable
+          SUBSCRIBERS_TABLE: !Ref SubscribersTable
+      Events:
+        MessageRule:
+          Type: Schedule
+          Properties:
+            Schedule: 'rate(1 hour)'
+            Name: MessageRule
+
   ScheduledMessagesBucket:
     Type: AWS::S3::Bucket
 
   ScheduledMessagesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: "scheduled_messages"
       AttributeDefinitions: 
         - 
           AttributeName: "group_name"

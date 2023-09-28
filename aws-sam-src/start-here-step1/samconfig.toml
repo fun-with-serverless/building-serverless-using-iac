@@ -4,7 +4,7 @@ version = 0.1
 
 [default]
 [default.global.parameters]
-stack_name = "hello-sam"
+stack_name = "serverless-iac-workshop"
 
 [default.build.parameters]
 cached = true

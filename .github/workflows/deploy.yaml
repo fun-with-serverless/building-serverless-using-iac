@@ -1,0 +1,51 @@
+name: Publish to S3
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+
+    - name: Set up Poetry
+      run: |
+        pipx install poetry
+
+    - name: Set up Python 3.11
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        cache: 'poetry'
+
+    - name: Install dependencies
+      run: |
+        poetry install
+    - name: Build docs
+      run: |
+        poetry run mkdocs build
+
+    - name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: us-east-1
+        role-to-assume: arn:aws:iam::201893381538:role/GitHubRole
+        role-session-name: GitHubActionsSession
+    - name: Upload to S3
+      run: |
+        aws s3 sync --delete ./site s3://building-serverless-using-iac-site/
+        aws cloudfront create-invalidation --distribution-id $CF_DISTRIBUTION_ID_BUILDING_SERVERLESS_USING_AC --paths "/*"
+      env:
+        CF_DISTRIBUTION_ID: ${{ vars.CF_DISTRIBUTION_ID_BUILDING_SERVERLESS_USING_AC }}
+
+        
+
