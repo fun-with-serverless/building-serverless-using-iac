@@ -1,5 +1,6 @@
-
 Trigger a Lambda every hour to send the scheduled messages.
+![send](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/2345a27a-143e-49df-a4c8-ad951d401019)
+
 
 ## Implementation
 * Duplicate `get_subscribers` and rename the new folder `send_scheduled_messages`
