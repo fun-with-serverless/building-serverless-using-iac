@@ -1,4 +1,5 @@
 Schedule content to be sent at a specific hour and date to all the subscribers of a specific group.
+![schedule](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/9e2637f9-2ff5-4548-816c-5d4df74b1806)
 
 ## Implementation
 * Duplicate `get_subscribers` and rename the new folder `schedule_message`
