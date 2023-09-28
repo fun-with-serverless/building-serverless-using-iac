@@ -32,7 +32,8 @@ The workshop is divided into four main parts:
 To get the most out of the workshop, it's recommended that you complete all the exercises.
 
 ## Online access
-This workshop is available online on ...
+👉 **[The workshop is available online](https://building-serverless-using-iac.designfor.cloud/)** 👈
+
 
 # 🖥️ How to run locally
 1. Make sure you have `poetry` installed.
