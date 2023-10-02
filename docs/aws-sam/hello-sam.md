@@ -1,4 +1,7 @@
 ## Prepare your machine
+I highly recommend using Cloud9. AWS Cloud9 is a cloud-based integrated development environment (IDE) that allows you to write, run, and debug code from any web browser. Don't opt for the bare-minimum machine type; a 2-core machine (t2.small) is sufficient. If you're using Cloud9, you can execute the script located at `./scripts/update_python_on_cloud9.sh` to prepare your environment.
+
+If you prefer to use your own environment, please follow these steps:
 1. Install AWS SAM. Follow [https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
 2. Verify it works as expected, run `sam --version` you should be getting something like `> SAM CLI, version 1.96.0`. Pay attention that the version might change
 3. Check that you have a working Python environment, run `python --version`. In case you are getting an error:
