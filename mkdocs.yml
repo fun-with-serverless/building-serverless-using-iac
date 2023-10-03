@@ -90,7 +90,7 @@ nav:
     - Implement 'Add Subscribe': './aws-sam/add-subscribers.md'
     - Implement 'Schedule Message': './aws-sam/schedule-message.md'
     - Implement 'Send Message': './aws-sam/send-message.md'
-    - Grand finale: './aws-sam/add-authorizer.md'
+    - 🏁 Grand finale 🏁: './aws-sam/add-authorizer.md'
     - Cleanup: './aws-sam/deletion.md'
   - CDK
     
