@@ -1,3 +1,5 @@
+:construction: Work in Progress: This repository is currently under active development. Features may be incomplete, and documentation may not be up-to-date. Please proceed with caution and feel free to contribute! :construction:
+
 ## Welcome
 Ever wanted to create your own mailing list manager a la Serverless style, now is your chance. In this workshop you'll build a mailing list manager with the ability to:
 
