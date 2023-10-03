@@ -18,6 +18,8 @@ Here's the flow:
 * Based on the extracted information, the Lambda function makes an allow, deny, or unauthorized decision, which can involve anything from simple key matching to complex business logic or even third-party API calls.
 * API Gateway caches this decision for a configurable period (TTL), so subsequent requests with the same tokens don't trigger the Lambda authorizer again during this period.
 
+![auth](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/43d504c2-4d68-403f-8827-7337fd44a179)
+
 
 ## Implementation Pointers
 * In order to avoid complexity, let's assume we only have a single user, that their password is stored a secret in the secrets manager. Check the [official template documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-secretsmanager-secret.html). Use the [Lambda Power Tools](https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/) to extract the secrets
