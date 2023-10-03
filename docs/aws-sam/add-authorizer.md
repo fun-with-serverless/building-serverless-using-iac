@@ -22,7 +22,8 @@ Here's the flow:
 
 
 ## Implementation Pointers
-* In order to avoid complexity, let's assume we only have a single user, that their password is stored a secret in the secrets manager. Check the [official template documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-secretsmanager-secret.html). Use the [Lambda Power Tools](https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/) to extract the secrets
+* You will implement a Lambda authorizer solely for the message scheduling flow, while keeping the rest of the Lambdas open to the world.
+* To keep things simple, let's assume we have just a single user, and that their password is stored as a secret in Secrets Manager. Check the [official template documentation](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-secretsmanager-secret.html). Use the [Lambda Power Tools](https://docs.powertools.aws.dev/lambda/python/latest/utilities/parameters/) to extract the secrets
 * In order to define a Lambda authorizer, you need to define the API Gateway as a seperate SAM resource - 
 ```yaml
 RootApiRust:
