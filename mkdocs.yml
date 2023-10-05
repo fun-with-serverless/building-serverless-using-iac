@@ -94,4 +94,5 @@ nav:
     - Cleanup: './aws-sam/deletion.md'
   - CDK:
     - Hello CDK 👋: './cdk/hello-cdk.md'
+    - Implement 'Get Subscribers': './cdk/lambda-api-gateway.md'
     
