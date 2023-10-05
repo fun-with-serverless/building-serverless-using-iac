@@ -2,7 +2,7 @@
 
 import aws_cdk as cdk
 
-from lambda_api_gateway.lambda_api_gateway_stack import LambdaApiGatewayStack
+from mailinglist_app.iac.lambda_api_gateway_stack import LambdaApiGatewayStack
 
 
 app = cdk.App()
