@@ -97,3 +97,5 @@ nav:
     - Implement 'Get Subscribers': './cdk/lambda-api-gateway.md'
     - Adding a Lambda Layer: './cdk/adding-layer.md'
     - Using Constructs: './cdk/iac-encapsulation.md'
+    - 🏁 Grand finale 🏁: './cdk/finish-them.md'
+    - Cleanup: './cdk/deletion.md'
