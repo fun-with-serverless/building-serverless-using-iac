@@ -95,4 +95,5 @@ nav:
   - CDK:
     - Hello CDK 👋: './cdk/hello-cdk.md'
     - Implement 'Get Subscribers': './cdk/lambda-api-gateway.md'
-    
+    - Adding a Lambda Layer: './cdk/adding-layer.md'
+    - Using Constructs: './cdk/iac-encapsulation.md'
