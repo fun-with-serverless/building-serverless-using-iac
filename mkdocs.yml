@@ -92,5 +92,10 @@ nav:
     - Implement 'Send Message': './aws-sam/send-message.md'
     - 🏁 Grand finale 🏁: './aws-sam/add-authorizer.md'
     - Cleanup: './aws-sam/deletion.md'
-  - CDK
-    
+  - CDK:
+    - Hello CDK 👋: './cdk/hello-cdk.md'
+    - Implement 'Get Subscribers': './cdk/lambda-api-gateway.md'
+    - Adding a Lambda Layer: './cdk/adding-layer.md'
+    - Using Constructs: './cdk/iac-encapsulation.md'
+    - 🏁 Grand finale 🏁: './cdk/finish-them.md'
+    - Cleanup: './cdk/deletion.md'

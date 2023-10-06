@@ -1,5 +1,5 @@
 #!/bin/bash
-
+echo Update system
 # Update system
 sudo yum update -y
 
@@ -19,12 +19,18 @@ echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nf
 source ~/.bash_profile
 
 # Install Python 3.11
+echo Install Python 3.11
 pyenv install 3.11
 
 # Install AWS SAM
+echo Install AWS SAM
 wget https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
 unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
 sudo ./sam-installation/install
 rm -rf aws-sam-cli-linux-x86_64.zip && rm -rf ./sam-installation
+
+#Install CDK
+echo Install CDK
+npm install -g aws-cdk 
 # Set Python 3.11 as global default
 echo "Run 'source ~/.bash_profile && pyenv global 3.11' to complete the setup"

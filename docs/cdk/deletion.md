@@ -1,0 +1,1 @@
+After you've completed the workshop, you can delete all the resources you created by running `cdk destroy`` and answering 'y' to all prompts. Please note that the CDK bootstrap stack will not be deleted.
