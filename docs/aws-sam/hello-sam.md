@@ -1,6 +1,10 @@
 ## Prepare your machine
-I highly recommend using Cloud9. AWS Cloud9 is a cloud-based integrated development environment (IDE) that allows you to write, run, and debug code from any web browser. Don't opt for the bare-minimum machine type; a 2-core machine (t2.small) is sufficient. If you're using Cloud9, you can execute the script located at `./scripts/update_python_on_cloud9.sh` to prepare your environment. Use Linux 2 as the OS.
+### Cloud9
+1. I highly recommend using Cloud9. AWS Cloud9 is a cloud-based integrated development environment (IDE) that allows you to write, run, and debug code from any web browser. Don't opt for the bare-minimum machine type; a 2-core machine (t2.small) is sufficient. Use Ubuntu as the OS, Linux 2 is too old..
+2. After creating the machine, clone `https://github.com/fun-with-serverless/building-serverless-using-iac.git`
+3. Execute the script located at `./scripts/update_python_on_cloud9.sh` to prepare your environment. It'll take a couple of minutes. Grab a cup of coffee.
 
+### Non Cloud9 machine
 If you prefer to use your own environment, please follow these steps:
 
 1. Install AWS SAM. Follow [https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
@@ -27,6 +31,7 @@ In the following section we will build a simple hello world application using SA
 * If you choose to use the most popular runtime and package type, then make sure that Python 3.9 is installed
 * Choose `Python 3.11`
 * Choose `Zip`
+* Choose the default answers for the rest of the questions.
 * For project name, choose the default
 <img src="https://github.com/aws-hebrew-book/building-serverless-in-hebrew-workshop/assets/110536677/4bf1a5ca-cdbe-455b-a29d-2ce4a4ddddf0" width="400">
 
@@ -43,7 +48,9 @@ In the following section we will build a simple hello world application using SA
 
 ### Template
 	
-At the core of every AWS SAM application lies the template.yaml, a file that outlines the resources utilized by the app. Our sample template file is split into four main sections:
+At the core of every AWS SAM application lies the template.yaml, a file that outlines the resources utilized by the app. The file is located at the root of the SAM application you created; in our case, it's `sam-app`. 
+
+Our sample template file is split into four main sections:
   <ol>
     <li>
       Header - This section provides the template's definition and description, which are displayed in the CloudFormation console.
@@ -92,6 +99,12 @@ With AWS SAM, defining a Lambda function is as straightforward as pointing to a 
   
 ### Interoperability
 A key advantage of AWS SAM is its seamless integration with other services. For instance, in our example, we've integrated our Lambda function with API Gateway, demonstrating the simplicity of combining AWS services in a SAM application.
+
+### Deploying changes
+Each time you make changes to any of your source files, there are two steps that need to be done in order to deploy the changes to AWS:
+
+1. `sam build` - This creates the deployment package for the different Lambdas.
+2. `sam deploy` - This deploys the zip package along with any required changes in the additional resources that are created.
 
 ## Exercises
 * Accept a path parameter that contains your name, and when calling the endpoint, it will return the specified name - `hello <path parameter>`. For example calling `https://apigw-url/hello/efi` will return `hello efi`.

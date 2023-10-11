@@ -32,3 +32,5 @@ The workshop is divided into four main parts:
 You can find the relevant code for each section in the repository. You have the option to either write the code from scratch or use the repository as a starting point.
 
 To get the most out of the workshop, it's recommended that you complete all the exercises.
+
+In this workshop, I highly recommended to type the code instead of copying & pasting (there’s usually not much to type). This way, you’ll be able to fully experience what it’s like to use the AWS SAM and CDK. It’s especially cool to see your IDE help you with auto-complete, inline documentation and type safety.

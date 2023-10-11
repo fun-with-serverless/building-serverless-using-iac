@@ -1,5 +1,5 @@
 ## Prepare your machine
-I highly recommend using Cloud9. AWS Cloud9 is a cloud-based integrated development environment (IDE) that allows you to write, run, and debug code from any web browser. Don't opt for the bare-minimum machine type; a 2-core machine (t2.small) is sufficient. If you're using Cloud9, you can execute the script located at `./scripts/update_python_on_cloud9.sh` to prepare your environment. Use Linux 2 as the OS.
+I highly recommend using Cloud9. AWS Cloud9 is a cloud-based integrated development environment (IDE) that allows you to write, run, and debug code from any web browser. Don't opt for the bare-minimum machine type; a 2-core machine (t2.small) is sufficient. If you're using Cloud9, you can execute the script located at `./scripts/update_python_on_cloud9.sh` to prepare your environment. Use Ubuntu as the OS, Linux 2 is too old.
 
 If you prefer to use your own environment, please follow these steps:
 

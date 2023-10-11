@@ -1,12 +1,14 @@
+You are starting to build the main project. The relevant code samples are found under `aws-sam-src`. I recommend building the code step by step, following the instructions. However, I've also included the source code for each chapter in case you don't want to build from scratch.
+
 ## Architecture
 
 The "Get Subscribers" function returns a list of all email addresses that have subscribed to a specific mailing list.
 
 ![get-subscribers](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/2a6c83f7-8988-4e32-9bae-cd69d6fc3843)
 
-
 ## Implementation
-* Go to `start-here-step1`
+* You can delete `sam-app` folder created by `sam init`.
+* Go to `aws-sam-src/start-here-step1`
 * You should see a basic structure of our SAM aplication for managing user groups.
 * Add `boto3==1.21.37` to `get_subscribers/requirements.txt`
 * Paste
@@ -27,7 +29,7 @@ Resources:
     Properties:
       CodeUri: get_subscribers/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Environment:
         Variables: #(2)!
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
