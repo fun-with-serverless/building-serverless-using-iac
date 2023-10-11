@@ -1,7 +1,7 @@
 site_name: Build Serverless applications using IaC
 repo_url: https://github.com/fun-with-serverless/building-serverless-using-iac
 site_url: https://github.com/fun-with-serverless/building-serverless-using-iac
-edit_uri: edit/main/docs/
+edit_uri: edit/master/docs/
 repo_name: building-serverless-using-iac
 
 theme:
