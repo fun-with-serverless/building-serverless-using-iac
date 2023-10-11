@@ -1,11 +1,10 @@
 #!/bin/bash
 echo Update system
 # Update system
-sudo yum update -y
+sudo apt update -y
 
 # Install prerequisites
-sudo yum remove -y openssl-devel
-sudo yum install -y gcc openssl11-devel bzip2-devel libffi-devel zlib-devel readline-devel sqlite-devel wget curl git xz-devel
+sudo apt-get install -y build-essential zlib1g-dev libffi-dev libssl-dev libbz2-dev libreadline-dev libsqlite3-dev liblzma-dev
 
 # Clone pyenv repository
 git clone https://github.com/pyenv/pyenv.git ~/.pyenv
@@ -26,11 +25,8 @@ pyenv install 3.11
 echo Install AWS SAM
 wget https://github.com/aws/aws-sam-cli/releases/latest/download/aws-sam-cli-linux-x86_64.zip
 unzip aws-sam-cli-linux-x86_64.zip -d sam-installation
-sudo ./sam-installation/install
+sudo ./sam-installation/install --update
 rm -rf aws-sam-cli-linux-x86_64.zip && rm -rf ./sam-installation
 
-#Install CDK
-echo Install CDK
-npm install -g aws-cdk 
 # Set Python 3.11 as global default
 echo "Run 'source ~/.bash_profile && pyenv global 3.11' to complete the setup"
