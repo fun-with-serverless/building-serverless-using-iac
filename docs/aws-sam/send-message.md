@@ -17,7 +17,7 @@ from dacite import from_dict
 from utils.models import Message
 from aws_lambda_powertools import Logger
 
-from utils.consts import SCHEDULED_MESSAGES_TABLE, SUBSCRIBERS_TABLE, SCHEDULED_MESSAGES_BUCKET, logger, SOURCE_EMAIL
+from utils.consts import SCHEDULED_MESSAGES_TABLE, SUBSCRIBERS_TABLE, SCHEDULED_MESSAGES_BUCKET, SOURCE_EMAIL
 from utils.general import get_schedule_date_key, get_subscribers_by_group
 
 logger = Logger()
@@ -149,7 +149,7 @@ SendScheduledMessagesFunction:
     Properties:
       CodeUri: send_scheduled_messages/
       Handler: app.lambda_handler
-      Runtime: python3.7
+      Runtime: python3.11
       Architectures:
         - x86_64
       Policies:
@@ -168,25 +168,26 @@ SendScheduledMessagesFunction:
       Environment:
         Variables:
           SCHEDULED_MESSAGES_BUCKET_NAME: !Ref ScheduledMessagesBucket
-          SOURCE_EMAIL: !Ref SourceEmail
+          SOURCE_EMAIL: !Ref SourceEmail #(1)!
           SCHEDULED_MESSAGES_TABLE_NAME: !Ref ScheduledMessagesTable
           SUBSCRIBERS_TABLE: !Ref SubscribersTable
       Events:
         MessageRule:
-          Type: Schedule #(1)!
+          Type: Schedule #(2)!
           Properties:
-            Schedule: 'rate(1 hour)' #(2)!
+            Schedule: 'rate(1 hour)' #(3)!
             Name: MessageRule
 ```
 
-1. Many events can trigger a Lambda; a scheduled event is one of them.
-2. You can use also a cron string.
+1. Access the value of the parameter we will define shortly.
+2. Many events can trigger a Lambda; a scheduled event is one of them.
+3. You can use also a cron string.
 
 
 Under the `Resources` section 
 
 
-Add
+* Add
 ``` yaml
 Parameters:
   SourceEmail:
@@ -194,20 +195,26 @@ Parameters:
 ```
 above `Resources` section.
 
-10. Let's deploy it `sam build && sam deploy --guided`. Make sure to define `SourceEmail` parameter to your email
-11. Next you need to verify your email (the one you defined at the previous step) under the SES service. Follow https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure
-12. You are ready to test it
+* Add
+```
+aws-lambda-powertools
+```
+to `group_subscription_layer/utils/requirements.txt`
+* Let's deploy it `sam build && sam deploy --guided`. Make sure to define `SourceEmail` parameter to your email
+* Next you need to verify your email (the one you defined at the previous step) under the SES service. Follow https://docs.aws.amazon.com/ses/latest/dg/creating-identities.html#verify-email-addresses-procedure
+* You are ready to test it
 
 ## Testing
-1. Let's make sure your email is subscribed to the `serverless` group.
+1. Let's make sure your email is subscribed to the `sam` group.
 ```
-curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/serverless/subscribers -H 'Content-Type: application/json' -d '{"email":"youreamil@mail.com"}'
-
-curl https://<ap-id>.execute-api.us-east-1.amazonaws.com/Prod/serverless/subscribers
+curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/sam/subscribers -H 'Content-Type: application/json' -d '{"email":"youreamil@mail.com"}'
+```
+```
+curl https://<ap-id>.execute-api.us-east-1.amazonaws.com/Prod/sam/subscribers
 ```
 2. Let's schedule a message for this hour. For the timestamp use https://www.epochconverter.com/
 ```
-curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/serverless/schedule -H 'Content-Type: application/json' -d '{"subject":"Hello SLS workshop!", "body":"The workshop is not recorded.<h1>Welcome dear friends</h1>", "schedule_on":<epoch including milliseconds>}'
+curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/sam/schedule -H 'Content-Type: application/json' -d '{"subject":"Hello SLS workshop!", "body":"The workshop is not recorded.<h1>Welcome dear friends</h1>", "schedule_on":<epoch including milliseconds>}'
 ```
 3. We can wait for the `SendScheduledMessagesFunction` Lambda to be triggered, but let's try to run it manually.
 4. Go the AWS Lambda console, click on the `Test` tab, choose the default values and click on `Save.
@@ -219,8 +226,12 @@ curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/serverles
    
 
 ## Insights
+### Parameters
+Sometimes you need to accept external values from the users of your template. For example, in our case, we might need an email from which the messages will be sent. This can be achieved in AWS SAM using `Parameters`. When running `sam deploy --guided`, AWS SAM will prompt for the parameter and ask the user to provide its value. You can later access the value of the parameters using `!Ref`.
+
 #### Scheduling
 There are multiple ways to schedule events in AWS:
+
 * Use [SQS Delay Queues](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-delay-queues.html) to postpone the delivery of a new message by up to 15 minutes.
 * Using [EventBridge Rule](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html) is the most straightforward method to schedule an event.
 * Using [DDB TTL with DDB Streams](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/time-to-live-ttl-streams.html) to trigger a Lambda.

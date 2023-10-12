@@ -231,6 +231,7 @@ response = table.put_item(
 AWS Tags are a valuable feature in AWS. I highly recommend making use of them wherever possible, as they can aid in [cost optimization](https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/cost-alloc-tags.html) and [compliance](https://docs.aws.amazon.com/config/latest/developerguide/tagging.html).
 
 In addition to tagging resources, you can also tag your S3 objects, which serves several purposes:
+
 * An easy way to understand the content of the object without actually downloading and opening it.
 * Identify large objects in S3, manage their costs, and control their [life cycle](https://aws.amazon.com/blogs/storage/simplify-your-data-lifecycle-by-using-object-tags-with-amazon-s3-lifecycle/)
 * [Access control](https://docs.aws.amazon.com/AmazonS3/latest/userguide/tagging-and-policies.html)

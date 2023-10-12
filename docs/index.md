@@ -36,8 +36,16 @@ The workshop is divided into four main parts:
 * Building the application from scratch using AWS SAM and Python. Each subsection focuses on constructing a different part of the application, covering both code and the relevant IaC.
 * Rebuilding the application using AWS CDK, based on the code developed in the AWS SAM section. This part solely focuses on the CDK aspect, as it assumes familiarity with the application's code.
 
-You can find the relevant code for each section in the repository. You have the option to either write the code from scratch or use the repository as a starting point.
 
-To get the most out of the workshop, it's recommended that you complete all the exercises.
+## Source Code
+You can find the relevant code for each section in the repository under `aws-sam-src` and `cdk-src`. You have the option to either write the code from scratch or use the repository as a starting point.
 
 In this workshop, I highly recommended to type the code instead of copying & pasting (there’s usually not much to type). This way, you’ll be able to fully experience what it’s like to use the AWS SAM and CDK. It’s especially cool to see your IDE help you with auto-complete, inline documentation and type safety.
+
+## Page Structure
+Each page is divided into four main parts:
+* High level architecture.
+* Implementation details - Code snippets that drive the application you build. Pay attention to the fact that the code snippets contain comments, represented by a + sign. You can click on the comments to get more context.
+![comments](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/4d5c6765-c350-4b13-a405-63fbce820288)
+* Insights - Various insights about the code itself. Usually, the insights expand upon the comments given in the previous section.
+* Exercises - To get the most out of the workshop, it's recommended that you complete all the exercises.
