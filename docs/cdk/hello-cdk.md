@@ -6,16 +6,19 @@ If you prefer to use your own environment, please follow these steps:
 1. Install CDK. Execute `npm install -g aws-cdk`.
 2. Verify it works as expected, run `cdk --version`.
 3. Check that you have a working Python environment, run `python --version`. In case you are getting an error:
-   - Install [pyenv](https://github.com/pyenv/pyenv)
-   - Install Python 3.11 - `pyenv install 3.11`
-   - Make it global - `pyenv global 3.11`
+    1. Install [pyenv](https://github.com/pyenv/pyenv)
+    2. Install Python 3.11 - `pyenv install 3.11`
+    3. Make it global - `pyenv global 3.11`
 
 4. Clone `https://github.com/fun-with-serverless/building-serverless-using-iac.git`
+
+## Resize your EBS
+In case you are using Cloud9, each machine is equipped with 10GB of disk space, which sometimes is not enough, especially if you are using CDK. [Follow these instructions to add more disk space](https://ec2spotworkshops.com/ecs-spot-capacity-providers/workshopsetup/resize_ebs.html).
 
 ## What is AWS CDK ?
 Just like AWS SAM, AWS CDK is an IaC framework that allows you to define your infrastructure as code, but with a twist. If you're familiar with CDK, you can skip the next section.
 
-AWS SAM, Terraform, Cloudformation and other IaC as well are declarative IaC. Declarative IaC is an approach where developers specify the desired end state of the infrastructure without detailing the steps to achieve it. The underlying IaC tooling then determines the necessary actions to bring the infrastructure to that state. 
+AWS SAM, Terraform, Cloudformation and other IaC as well are **Declarative IaC**. Declarative IaC is an approach where developers specify the desired end state of the infrastructure without detailing the steps to achieve it. The underlying IaC tooling then determines the necessary actions to bring the infrastructure to that state. 
 Let's look at a declarative IaC example using AWS SAM to create a simple Lambda function and an API Gateway endpoint:
 
 ```yaml
@@ -40,7 +43,7 @@ The HelloWorldFunction resource simply states that there should exist a Lambda f
 
 The Events property states that an API Gateway endpoint should be linked to this function at the specified path (/hello) with the given method (get). Again, it doesn't detail how to set up the API Gateway, how to link it to the Lambda function, or any other procedural steps.
 
-On the other hand Imperative IaC defines the specific steps and commands that must be executed to achieve a desired infrastructure state. Instead of merely describing the desired end state, it provides a sequence of actions to be taken to create or modify the infrastructure. 
+On the other hand CDK is **Imperative IaC**. Imperative IaC defines the specific steps and commands that must be executed to achieve a desired infrastructure state. Instead of merely describing the desired end state, it provides a sequence of actions to be taken to create or modify the infrastructure. 
 
 Let's represent this with a pseudo-code that mirrors the process of setting up the resources mentioned in the declarative AWS SAM example:
 ```javascript
@@ -115,8 +118,10 @@ In the following section we will build a simple hello world application using SA
 * Create a new folder named `iac-cdk-workshop` and navigate to it using `cd iac-cdk-workshop`.
 * Initialize a CDK example using a template with the command `cdk init sample-app --language=python`.
 * Since we are using Python, the CDK will automatically create a `virtualenv` for you. Activate the virtualenv by running `source .venv/bin/activate`.
+
 ??? info
-  Python virtualenv is a tool that allows developers to create isolated Python environments to ensure dependencies are kept consistent and separate for different projects.
+    Python virtualenv is a tool that allows developers to create isolated Python environments to ensure dependencies are kept consistent and separate for different projects.
+
 * Install the necessary dependencies using the command `pip install -r requirements.txt`.
 * The CDK code for our project consists of two files: `app.py` and `iac_cdk_workshop/iac_cdk_workshop_stack.py`.
 ```python
@@ -172,6 +177,7 @@ class IacCdkWorkshopStack(Stack):
 ```
 
 In the provided code, we inherit from `Stack` and create two AWS resources: SQS and SNS. Note that instantiating a new object, whether it's SQS or Stack, requires at least two parameters:
+
 1. A construct - This is a fundamental building block representing a "cloud component," encapsulating all that AWS CloudFormation needs to create the component.
 2. A logical name that will be used in the final CloudFormation template.
 

@@ -44,6 +44,7 @@ In this workshop, I highly recommended to type the code instead of copying & pas
 
 ## Page Structure
 Each page is divided into four main parts:
+
 * High level architecture.
 * Implementation details - Code snippets that drive the application you build. Pay attention to the fact that the code snippets contain comments, represented by a + sign. You can click on the comments to get more context.
 ![comments](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/4d5c6765-c350-4b13-a405-63fbce820288)

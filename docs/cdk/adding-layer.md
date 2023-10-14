@@ -10,7 +10,7 @@ Before moving on to the rest of the implementation, I want to pause and explain 
 |-------group_subscription_layer
 app.py
 ```
-and copy the content of `group_subscription_layer` from the AWS SAM project to the one found here.
+Copy the contents of `group_subscription_layer` from the AWS SAM project to the one found here. Also, move the previous content found under `src` into `get_subscribers`.
 
 
 * Insert the content into `iac/lambda_api_gateway_stack.py`.

@@ -71,7 +71,7 @@ extra:
           data: 0
           note: >- 
             Thanks for your feedback! Help us improve this page by
-            using our <a href="https://github.com/aws-hebrew-book/pytest-lambda-workshop/issues/new/choose" target="_blank" rel="noopener">openning an issue</a>.
+            using our <a href="https://github.com/fun-with-serverless/building-serverless-using-iac/issues/new/choose" target="_blank" rel="noopener">openning an issue</a>.
   social:
     - icon: fontawesome/brands/twitter 
       link: https://twitter.com/TServerless

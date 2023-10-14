@@ -3,25 +3,29 @@ In this section, we'll deploy a Lambda function linked to API Gateway. We'll beg
 ![get-subscribers](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/2a6c83f7-8988-4e32-9bae-cd69d6fc3843)
 
 ## Implementation
-* Navigate to `lambda-api-gateway` located within `cdk-src`.
+* Navigate to `lambda-api-gateway-start-here` located within `cdk-src`.
 * Our stack is already set up in `app.py`, so our modifications will focus on `lambda_api_gateway_stack.py`.
 * Before moving forward, ensure you create and activate your `virtualenv`. Since `virtualenv` isn't included in git, set it up using `python -m venv .venv` or your preferred method, such as [poetry](https://python-poetry.org/), then activate with `source .venv/bin/activate`.
 * Install the necessary dependencies with `pip install -r requirements.txt`.
 *   While code organization can be subjective, a best practice in CDK is to structure it as:
-```
+
+``` {.bash .annotate}
 |--app1
-|----iac
-|----application code
+|----iac #(1)!
+|----application code #(2)!
 |--app2
 |----iac
 |----application code
-app.py
+app.py #(2)!
 ```
 
+1. CDK code related to this app is found here. Usually, each app will create a separate stack.
+2. The source code for the application itself.
+2. Tie all the stacks in a single file - `app.py`.
 
 Where each app corresponds to its own stack.
 
-* Insert the content into `iac/lambda_api_gateway_stack.py`.
+* Insert the content
 
 ``` {.python .annotate}
 from constructs import Construct
@@ -88,7 +92,17 @@ class LambdaApiGatewayStack(Stack): #(2)!
 10. Bestow the Lambda with the necessary permissions to interface with DynamoDB.
 11. As a part of the CDK deployment process, output the complete HTTP path.
 
-* To use the Python Lambda construct, append `aws-cdk-aws-lambda-python-alpha` to the `requirements.txt` located in the root directory.
+into `iac/lambda_api_gateway_stack.py`
+
+* Deploy the application. Run `cdk deploy`
+* Try invoking the API listed in the outputs.
+```
+Outputs:
+LambdaApiGatewayStack.GroupURL = https://xxxxxx.execute-api.us-east-1.amazonaws.com/prod/{group}/subscribers
+LambdaApiGatewayStack.MailingListAPIEndpoint92BB94CD = https://xxxxxx.execute-api.us-east-1.amazonaws.com/prod/
+Stack ARN:
+```
+
 
 ## Insights
 
