@@ -165,7 +165,6 @@ Add a new table definition
 ScheduledMessagesTable:
     Type: AWS::DynamoDB::Table
     Properties:
-      TableName: "scheduled_messages"
       AttributeDefinitions: 
         - 
           AttributeName: "group_name"

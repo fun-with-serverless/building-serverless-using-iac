@@ -176,7 +176,6 @@ SendScheduledMessagesFunction:
           Type: Schedule #(2)!
           Properties:
             Schedule: 'rate(1 hour)' #(3)!
-            Name: MessageRule
 ```
 
 1. Access the value of the parameter we will define shortly.
