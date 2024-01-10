@@ -1,6 +1,6 @@
 ## Prepare your machine
 ### Cloud9
-1. I highly recommend using Cloud9. AWS Cloud9 is a cloud-based integrated development environment (IDE) that allows you to write, run, and debug code from any web browser. Don't opt for the bare-minimum machine type; a 2-core machine (t2.small) is sufficient, assign at least 50 GB of disk space. Use Ubuntu as the OS, Linux 2 is too old.
+1. I highly recommend using Cloud9. AWS Cloud9 is a cloud-based integrated development environment (IDE) that allows you to write, run, and debug code from any web browser. Don't opt for the bare-minimum machine type; a 2-core machine (t2.small) is sufficient, [assign at least 50 GB of disk space](#resize-your-ebs). The script in Step 3 is designed for Ubuntu; therefore, select Ubuntu as your operating system in the dropdown menu.
 2. After creating the machine, clone `https://github.com/fun-with-serverless/building-serverless-using-iac.git`
 3. Execute the script located at `./scripts/update_python_on_cloud9.sh` to prepare your environment. It'll take a couple of minutes. Grab a cup of coffee.
 
