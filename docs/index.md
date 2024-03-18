@@ -1,10 +1,3 @@
-<iframe
-      src="https://covverapp.github.io/stand-with-israel/"
-      style="width: 100%; height: 250px; border: 0; overflow: hidden;"
-      title="stand-with-israel"
-      id="stand-with-israel">
-</iframe>
-
 ## Welcome
 Ever wanted to create your own mailing list manager a la Serverless style, now is your chance. In this workshop you'll build a mailing list manager with the ability to:
 
