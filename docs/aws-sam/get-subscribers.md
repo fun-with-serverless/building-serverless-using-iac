@@ -7,7 +7,7 @@ The "Get Subscribers" function returns a list of all email addresses that have s
 ![get-subscribers](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/2a6c83f7-8988-4e32-9bae-cd69d6fc3843)
 
 ## Implementation
-* You can delete `sam-app` folder created by `sam init`.
+* Delete the CF stack created by the sample app you've created by running `sam delete`. Next, you can delete the `sam-app` folder created by `sam init`. 
 * Go to `aws-sam-src/start-here-step1`
 * You should see a basic structure of our SAM aplication for managing user groups.
 * Add `boto3==1.21.37` to `get_subscribers/requirements.txt`
