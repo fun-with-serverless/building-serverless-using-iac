@@ -209,7 +209,7 @@ to `group_subscription_layer/utils/requirements.txt`
 curl -X POST https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/sam/subscribers -H 'Content-Type: application/json' -d '{"email":"youreamil@mail.com"}'
 ```
 ```
-curl https://<ap-id>.execute-api.us-east-1.amazonaws.com/Prod/sam/subscribers
+curl https://<api-id>.execute-api.us-east-1.amazonaws.com/Prod/sam/subscribers
 ```
 2. Let's schedule a message for this hour. For the timestamp use https://www.epochconverter.com/
 ```
