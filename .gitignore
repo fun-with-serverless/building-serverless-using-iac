@@ -43,7 +43,7 @@ htmlcov/
 .nox/
 .coverage
 .coverage.*
-.cache
+.cache/plugin/social/*.png
 nosetests.xml
 coverage.xml
 *.cover
