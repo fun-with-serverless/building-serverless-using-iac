@@ -16,12 +16,12 @@ In this section, we'll deploy a Lambda function linked to API Gateway. We'll beg
 |--app2
 |----iac
 |----application code
-app.py #(2)!
+app.py #(3)!
 ```
 
 1. CDK code related to this app is found here. Usually, each app will create a separate stack.
 2. The source code for the application itself.
-2. Tie all the stacks in a single file - `app.py`.
+3. Tie all the stacks in a single file - `app.py`.
 
 Where each app corresponds to its own stack.
 
