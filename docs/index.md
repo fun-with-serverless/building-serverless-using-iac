@@ -43,3 +43,24 @@ Each page is divided into four main parts:
 ![comments](https://github.com/fun-with-serverless/building-serverless-using-iac/assets/110536677/4d5c6765-c350-4b13-a405-63fbce820288)
 * Insights - Various insights about the code itself. Usually, the insights expand upon the comments given in the previous section.
 * Exercises - To get the most out of the workshop, it's recommended that you complete all the exercises.
+
+## Prepare your machine
+### Cloud9
+1. I highly recommend using Cloud9. AWS Cloud9 is a cloud-based integrated development environment (IDE) that allows you to write, run, and debug code from any web browser. Don't opt for the bare-minimum machine type; a 2-core machine (t2.small) is sufficient, [assign at least 50 GB of disk space](#resize-your-ebs). The script in Step 3 is designed for Ubuntu; therefore, select Ubuntu as your operating system in the dropdown menu.
+2. After creating the machine, clone `https://github.com/fun-with-serverless/building-serverless-using-iac.git`
+3. Execute the script located at `./scripts/update_python_on_cloud9.sh` to prepare your environment. It'll take a couple of minutes. Grab a cup of coffee.
+
+### Resize your EBS
+In case you are using Cloud9, each machine is equipped with 10GB of disk space, which sometimes is not enough, especially if you are using CDK. [Follow these instructions to add more disk space](https://ec2spotworkshops.com/ecs-spot-capacity-providers/workshopsetup/resize_ebs.html).
+
+### Non Cloud9 machine
+If you prefer to use your own environment, please follow these steps:
+
+1. Install AWS SAM. Follow [https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html)
+2. Verify it works as expected, run `sam --version` you should be getting something like `> SAM CLI, version 1.96.0`. Pay attention that the version might change
+3. Check that you have a working Python environment, run `python --version`. In case you are getting an error:
+    1. Install [pyenv](https://github.com/pyenv/pyenv)
+    2. Install Python 3.11 - `pyenv install 3.11`
+    3. Make it global - `pyenv global 3.11`
+
+4. Clone `https://github.com/fun-with-serverless/building-serverless-using-iac.git`
